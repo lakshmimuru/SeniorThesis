@@ -149,21 +149,21 @@ class Bert2BertSynCtrl(nn.Module):
 								torch.zeros(1,self.K,pad_len).to(device)),dim=2)
 			attention_mask_post_int = torch.cat((attention_mask_post_int,
 								torch.zeros(1,self.K,pad_len).to(device)),dim=2)
-			outputs_cont, outputs_discrete = self.forward(pre_int_seq, 
-								post_int_seq,
-								timestamps_pre_int, 
-								timestamps_post_int, 
-								seq_ids_pre_int, 
-								seq_ids_post_int, 
-								target_pre_int, 
-								target_post_int,
-								attention_mask_pre_int, 
-								attention_mask_post_int)
+		outputs_cont, outputs_discrete = self.forward(pre_int_seq, 
+							post_int_seq,
+							timestamps_pre_int, 
+							timestamps_post_int, 
+							seq_ids_pre_int, 
+							seq_ids_post_int, 
+							target_pre_int, 
+							target_post_int,
+							attention_mask_pre_int, 
+							attention_mask_post_int)
 
-			if outputs_discrete is not None:
-				outputs_discrete = torch.stack([torch.argmax(pred[0,post_int_seq_length-1]).reshape(1,-1) for pred in outputs_discrete],dim=1).reshape(-1)
+		if outputs_discrete is not None:
+			outputs_discrete = torch.stack([torch.argmax(pred[0,post_int_seq_length-1]).reshape(1,-1) for pred in outputs_discrete],dim=1).reshape(-1)
 			
-			return outputs_cont[0,post_int_seq_length-1], outputs_discrete#Shape feature_dims
+	return outputs_cont[0,post_int_seq_length-1], outputs_discrete 
 
 
 
