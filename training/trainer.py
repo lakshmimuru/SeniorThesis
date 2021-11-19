@@ -2,7 +2,7 @@
 
 
 
-#todo many changes
+
 import numpy as np
 import torch
 from torch.utils.data import DataLoader, TensorDataset
@@ -15,19 +15,15 @@ class PreTrainer:
 
     def __init__(self,
 				model,
-				device,
-				config,
 				optimizer, 
 				dataloader,
 				output_file,
-				device,
-				scheduler=None):
+				batch_size,
+				scheduler=None,
+				log_freq = 100):
         
-        self.dev
         self.model = model
-        if torch.cuda.device_count() > 1:
-  			model = nn.DataParallel(model)
-  		self.config = config
+  		self.config = model.config
         self.optimizer = optimizer
         self.scheduler = scheduler
         self.train_loader = dataloader
@@ -35,10 +31,12 @@ class PreTrainer:
         self.loss_fn_cont = nn.MSELoss()
         self.loss_fn_discrete = nn.BCEWithLogitsLoss()
         self.output_file= output_file
-        self.device = device
+        self.batch_size= batch_size
+        self.log_freq = log_freq
+  
 
 
-    def train(self, num_iters, batch_size, log_freq = 100, load_from_checkpoint = None):
+    def train(self, num_iters, load_from_checkpoint = None):
 
     	self.model.train()
     	log = dict()
@@ -60,7 +58,7 @@ class PreTrainer:
     		
 			pre_int_seq, post_int_seq, timestamps_pre_int, timestamps_post_int, seq_ids_pre_int, 
 				seq_ids_post_int, target_pre_int, target_post_int, attention_mask_pre_int, attention_mask_post_int, 
-				target_cont, target_discrete = self.train_loader.get_batch(batch_size)
+				target_cont, target_discrete = self.train_loader.get_batch(self.batch_size)
 				
 			
 
@@ -94,7 +92,7 @@ class PreTrainer:
 			if self.scheduler is not None:
  				self.scheduler.step()
 
-            if i%log_freq == 0:
+            if i%self.log_freq == 0:
 
             	loss_accumulate = np.array(loss_accumulate)
 				log[str(i)] = {'train_loss_mean':np.mean(loss_accumulate),'train_loss_std':np.std(loss_accumulate)}

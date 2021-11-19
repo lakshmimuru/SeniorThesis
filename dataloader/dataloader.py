@@ -5,7 +5,7 @@ import torch
 import random
 
 
-def low_rank(data, pct_to_keep, cont_dim):
+def low_rank(data, pct_to_keep):
 
 	#todo: roshini meeting
 
@@ -31,7 +31,9 @@ class PreTrainDataLoader:
 		self.mask = np.load(dir_path+'mask.npy')
 		self.data_init[mask] = 0
 		if lowrank_approx:
-			self.data = low_rank(self.data_init,pct_to_keep, self.cont_dim)
+			self.data = self.data_init
+			self.data[:,:,:self.cont_dim] = low_rank(self.data_init[:,:,:self.cont_dim],pct_to_keep, self.cont_dim)
+			
 		else:
 			self.data = self.data_init
 		self.seqs = config.seq_range
