@@ -14,15 +14,34 @@ from transformers import BertConfig
 from trainer import PreTrainer 
 from dataloader import PreTrainDataLoader
 
-def run_experiment(args, num_iters=5e5):
+def run_pretraining(args, num_iters=1e5):
 
 	device = torch.device('cuda:0' if torch.cuda.is_available else "cpu")	
+
+
 
 	if not(os.path.exists(args.op_path)):
 		os.mkdir(args.op_path)
 
 
 	config = yaml.load(open(args.config,'r'),Loader=yaml.FullLoader)
+	
+	if args.target_index is not None:
+		exclude_ids = [args.target_index]
+	
+	elif exp_name == 'basque':
+		exclude_ids = [16]#basque county has index 16
+
+	elif exp_name == 'germany':
+		exclude_ids = [6]# west germany has index 6
+
+	elif exp_name == 'prop99':
+		exlude_ids = [2] #california has index 2
+
+	#elif exp_name == 'retail':
+
+	#elif exp_name == 'cricket':
+
 	config_model = BertConfig(hidden_size = config['hidden_size'],
 							num_hidden_layers = config['n_layers'],
 							num_attention_heads = config['n_heads'],
@@ -44,7 +63,8 @@ def run_experiment(args, num_iters=5e5):
 	dataloader = PreTrainDataLoader(args.seed,
 									args.datapath,
 									device,
-									config_model)
+									config_model,
+									exclude_ids)
 	optimizer = torch.optim.AdamW(model.parameters(),
 								lr=eval(config['lr']),
 								weight_decay=eval(config['weight_decay']),
@@ -76,6 +96,7 @@ def main():
 	parser.add_argument('--config',type=str, default='')
 	parser.add_argument('--op_path',type=str,default='')
 	parser.add_argument('--random_seed',type=int,default=0)
+	parser.add_argument('--target_index',type=int,default=0)
 	parser.add_argument('--checkpoint',type=str,default=None)
 	args = parser.parse_args()
-	run_experiment(args)
+	run_pretraining(args)
