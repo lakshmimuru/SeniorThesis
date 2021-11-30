@@ -6,10 +6,17 @@ import random
 
 
 def low_rank(data, pct_to_keep):
-
-	#todo: roshini meeting
-
-
+	data_flat = data.reshape(len(data),-1) # N x K x T  -->  N x KT
+	u, s, v = np.linalg.svd(data_flat.astype(float))
+	
+	k = int(np.rint(len(s)*pct_to_keep/100))
+	u_approx = u[:, :k]
+	s_approx = np.diag(s[:k])
+	v_approx = v[:k, :]
+	
+	approx_flat = np.dot(u_approx, np.dot(s_approx, v_approx))
+	approx = approx_flat.reshape(data.shape[0], data.shape[1], data.shape[2])
+	return approx	
 
 
 class PreTrainDataLoader:
