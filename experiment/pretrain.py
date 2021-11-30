@@ -5,9 +5,11 @@ import torch.nn as nn
 import os
 import sys
 import numpy as np
+import argparse
+import yaml
 sys.path.append('../models/')
 sys.path.append('../training/')
-sys.path.append('../data_generator/')
+sys.path.append('../dataloader/')
 sys.path.append('../transformers/src/')
 from bert2bert import Bert2BertSynCtrl
 from transformers import BertConfig
@@ -28,15 +30,19 @@ def run_pretraining(args, num_iters=1e5):
 	
 	if args.target_index is not None:
 		exclude_ids = [args.target_index]
+		classes = None 
 	
 	elif exp_name == 'basque':
 		exclude_ids = [16]#basque county has index 16
+		classes = None 
 
 	elif exp_name == 'germany':
 		exclude_ids = [6]# west germany has index 6
+		classes = None 
 
 	elif exp_name == 'prop99':
 		exlude_ids = [2] #california has index 2
+		classes = None 
 
 	#elif exp_name == 'retail':
 
@@ -47,6 +53,8 @@ def run_pretraining(args, num_iters=1e5):
 							num_attention_heads = config['n_heads'],
 							intermediate_size = 4*config['hidden_size'],
 							vocab_size = 0,
+							max_position_embeddings = 0,
+							output_hidden_states = True,
 							)
 
 	config_model.add_syn_ctrl_config(K=config['K'],
@@ -56,11 +64,12 @@ def run_pretraining(args, num_iters=1e5):
 									time_range=config['time_range'],
 									seq_range=config['seq_range'],
 									cont_dim=config['cont_dim'],
-									discrete_dim=config['discrete_dim'])
+									discrete_dim=config['discrete_dim'],
+									classes = classes)
 
 	model = Bert2BertSynCtrl(config_model, args.random_seed)
 	model = model.to(device)
-	dataloader = PreTrainDataLoader(args.seed,
+	dataloader = PreTrainDataLoader(args.random_seed,
 									args.datapath,
 									device,
 									config_model,
@@ -100,3 +109,6 @@ def main():
 	parser.add_argument('--checkpoint',type=str,default=None)
 	args = parser.parse_args()
 	run_pretraining(args)
+
+if __name__ == "__main__":
+    main()

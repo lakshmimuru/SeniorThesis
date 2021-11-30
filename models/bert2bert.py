@@ -3,9 +3,11 @@
 import torch
 import sys
 sys.path.append('../transformers/src/')
-from transformers import BertConfig, BertModelSynCtrl, EncoderDecoderModel
+from transformers import BertConfig, EncoderDecoderModel
+from transformers.models.bert.modeling_bert_syn_ctrl import BertModelSynCtrl
 import numpy as np
 import torch.nn as nn
+import copy
 
 
 class Bert2BertSynCtrl(nn.Module):
@@ -13,7 +15,7 @@ class Bert2BertSynCtrl(nn.Module):
 	This model is an encoder decoder model that enoodes in pre-intervention sequences and generates the control from post-intervention data of donor states
 	'''
 
-	def __init__(self, config):
+	def __init__(self, config, random_seed):
 
 		'''
 		Initialize a syn ctrl encoder decoder model.
@@ -23,18 +25,17 @@ class Bert2BertSynCtrl(nn.Module):
 
 		self.config = config
 		self.K = config.K 
-		self.hidden_dim = config.hidden_dim
+		self.hidden_dim = config.hidden_size
 		self.feature_dim = config.feature_dim
 		self.pre_int_len = config.pre_int_len
 		self.post_int_len = config.post_int_len
-		self.pred_dim = config.pred_dim
 		self.cont_dim = config.cont_dim#no. of cont features
 		self.discrete_dim = config.discrete_dim#no. of discrete features
 		self.classes = config.classes #List of no. of classes for each discrete feature
-		self.encoder_config =  config #BertConfig(K=config.K,max_position_embeddings=K*pre_int_len,hidden_size=self.hidden_dim)
-		self.encoder_config.max_position_embeddings = K*pre_int_len*embeddings
-		self.decoder_config = config #BertConfig(K=config.K,max_position_embeddings=K*post_int_len,is_decoder=True,add_cross_attention=True,hidden_size=self.hidden_dim)
-		self.decoder_config.max_position_embeddings = K*post_int_len*embeddings
+		self.encoder_config =  copy.deepcopy(config) #BertConfig(K=config.K,max_position_embeddings=K*pre_int_len,hidden_size=self.hidden_dim)
+		self.encoder_config.max_position_embeddings = 0#K*pre_int_len*embeddings
+		self.decoder_config = copy.deepcopy(config) #BertConfig(K=config.K,max_position_embeddings=K*post_int_len,is_decoder=True,add_cross_attention=True,hidden_size=self.hidden_dim)
+		self.decoder_config.max_position_embeddings = 0#K*post_int_len*embeddings
 		self.decoder_config.is_decoder = True
 		self.decoder_config.add_cross_attention = True
 		self.encoder_model = BertModelSynCtrl(self.encoder_config)
@@ -45,7 +46,7 @@ class Bert2BertSynCtrl(nn.Module):
 		self.embed_seq = nn.Embedding(config.seq_range,self.hidden_dim)
 		self.embed_target = nn.Embedding(2,self.hidden_dim)
 		self.embed_ln = nn.LayerNorm(self.hidden_dim)
-		self.predict_cont_target = nn.Linear(self.hidden_dim,self.cont_dim) 
+		self.predict_cont_target = nn.Linear(self.hidden_dim,1) 
 		if self.discrete_dim>0:
 			self.predict_discrete_target = [nn.Linear(self.hidden_dim, num_class) for num_class in self.classes]
 		else:
@@ -106,7 +107,8 @@ class Bert2BertSynCtrl(nn.Module):
 										decoder_attention_mask=attention_mask_post_int,
 										)
 
-		decoder_outputs = output.decoder_last_hidden_state.reshape(batch_size,post_int_seq_length,self.K,self.hidden_dim).permute(0,2,1,3)
+		last_hidden_state = outputs.decoder_hidden_states[-1]
+		decoder_outputs = last_hidden_state.reshape(batch_size,self.post_int_len,self.K,self.hidden_dim).permute(0,2,1,3)
 		cont_target_preds = self.predict_cont_target(decoder_outputs)[:,self.K-1] #Shape Bsize*post_int_seq_len*feature_dim
 		if self.predict_discrete_target is not None:
 			discrete_target_preds = [self.predict_discret_target[i](decoder_outputs)[:,self.K-1] 
@@ -163,7 +165,7 @@ class Bert2BertSynCtrl(nn.Module):
 		if outputs_discrete is not None:
 			outputs_discrete = torch.stack([torch.argmax(pred[0,post_int_seq_length-1]).reshape(1,-1) for pred in outputs_discrete],dim=1).reshape(-1)
 			
-	return outputs_cont[0,post_int_seq_length-1], outputs_discrete 
+		return outputs_cont[0,post_int_seq_length-1], outputs_discrete 
 
 
 
