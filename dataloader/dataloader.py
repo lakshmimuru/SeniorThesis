@@ -1,4 +1,4 @@
-#Author:Bhishma Dedhia
+#Author:Bhishma Dedhia 
 
 import numpy as np 
 import torch
@@ -17,6 +17,7 @@ def low_rank(data, pct_to_keep):
 
 	approx_flat = np.dot(u_approx, np.dot(s_approx, v_approx))
 	approx = approx_flat.reshape(data.shape[0], data.shape[1], data.shape[2])
+	print('Low rank conversion done')
 	return approx
 
 
@@ -41,11 +42,11 @@ class PreTrainDataLoader:
 		self.data_init = np.float32(np.load(dir_path+'data.npy',allow_pickle=True))
 		self.mask = np.load(dir_path+'mask.npy',allow_pickle=True)
 		self.data_init[self.mask] = 0
-		'''
+		
 		if lowrank_approx:
 			self.data = self.data_init
-			self.data[:,:,:self.cont_dim] = low_rank(self.data_init[:,:,:self.cont_dim],pct_to_keep, self.cont_dim)
-		'''
+			self.data[:,:,:self.cont_dim] = low_rank(self.data_init[:,:,:self.cont_dim],pct_to_keep)
+		
 		self.data = self.data_init
 		self.seqs = config.seq_range
 		self.exclude_ids = exclude_ids
@@ -77,6 +78,10 @@ class PreTrainDataLoader:
 			targets_discrete = None
 
 		for i in range(batch_size):
+
+			if len(self.seq_pool) <self.K:
+
+				print( len(self.seq_pool),self.K)
 
 			seq_ids = random.sample(self.seq_pool,self.K)
 			interv_time = np.random.randint(self.pre_int_len, self.time_range-self.post_int_len)

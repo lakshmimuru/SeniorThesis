@@ -16,11 +16,9 @@ from transformers import BertConfig
 from trainer import PreTrainer 
 from dataloader import PreTrainDataLoader
 
-def run_pretraining(args, num_iters=1e5):
+def run_pretraining(args, num_iters=5e5):
 
 	device = torch.device('cuda:0' if torch.cuda.is_available else "cpu")	
-
-
 
 	if not(os.path.exists(args.op_path)):
 		os.mkdir(args.op_path)
@@ -67,13 +65,20 @@ def run_pretraining(args, num_iters=1e5):
 									discrete_dim=config['discrete_dim'],
 									classes = classes)
 
+	if args.data_transform is not None:
+		lowrank = True
+
+	else:
+		lowrank = False
 	model = Bert2BertSynCtrl(config_model, args.random_seed)
 	model = model.to(device)
 	dataloader = PreTrainDataLoader(args.random_seed,
 									args.datapath,
 									device,
 									config_model,
-									exclude_ids)
+									exclude_ids,
+									lowrank_approx = lowrank)
+
 	optimizer = torch.optim.AdamW(model.parameters(),
 								lr=eval(config['lr']),
 								weight_decay=eval(config['weight_decay']),
@@ -91,6 +96,8 @@ def run_pretraining(args, num_iters=1e5):
 						scheduler
 						)
 
+	print(f'Running training with batch_size {batch_size}')
+
 	trainer.train(int(num_iters),args.checkpoint)
 
 
@@ -107,6 +114,7 @@ def main():
 	parser.add_argument('--random_seed',type=int,default=0)
 	parser.add_argument('--target_index',type=int,default=0)
 	parser.add_argument('--checkpoint',type=str,default=None)
+	parser.add_argument('--data_transform',type=str,default=None)
 	args = parser.parse_args()
 	run_pretraining(args)
 

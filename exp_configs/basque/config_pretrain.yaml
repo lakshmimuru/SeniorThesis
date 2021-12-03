@@ -12,7 +12,7 @@ post_int_len: 5
 seq_range: 18
 time_range: 43
 
-batch_size: 128
+batch_size: 1024
 lr: 1e-4
 weight_decay: 1e-4
 warmup_steps: 10000

@@ -109,7 +109,7 @@ class Bert2BertSynCtrl(nn.Module):
 
 		last_hidden_state = outputs.decoder_hidden_states[-1]
 		decoder_outputs = last_hidden_state.reshape(batch_size,self.post_int_len,self.K,self.hidden_dim).permute(0,2,1,3)
-		cont_target_preds = self.predict_cont_target(decoder_outputs)[:,self.K-1] #Shape Bsize*post_int_seq_len*feature_dim
+		cont_target_preds = self.predict_cont_target(decoder_outputs)[:,self.K-1] #Shape Bsize*post_int_len*feature_dim
 		if self.predict_discrete_target is not None:
 			discrete_target_preds = [self.predict_discret_target[i](decoder_outputs)[:,self.K-1] 
 												for i in range(self.discrete_dim)]
