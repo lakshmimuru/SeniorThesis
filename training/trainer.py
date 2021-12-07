@@ -73,7 +73,7 @@ class Trainer:
                                                   attention_mask_post_int,)
 
             target_cont_mask = target_cont[attention_mask_post_int[:,self.config.K-1]]
-            cont_pred_mask = cont_pred_mask[attention_mask_post_int[:,self.config.K-1]]
+            cont_pred_mask = cont_pred[attention_mask_post_int[:,self.config.K-1]]
 
             loss_cont = self.loss_fn_cont(cont_pred_mask,target_cont_mask)
             loss_discrete = 0
@@ -106,38 +106,5 @@ class Trainer:
                 if self.scheduler is not None:
                     checkpoint['scheduler_state_dict'] = self.scheduler.state_dict()
 
-                torch.save(checkpoint,self.output_file+str('model.pth')
+                torch.save(checkpoint,self.output_file+'model.pth')
                 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-       
-
-
-
-        
