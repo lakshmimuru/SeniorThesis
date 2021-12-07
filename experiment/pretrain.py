@@ -13,7 +13,7 @@ sys.path.append('../dataloader/')
 sys.path.append('../transformers/src/')
 from bert2bert import Bert2BertSynCtrl
 from transformers import BertConfig
-from trainer import PreTrainer 
+from trainer import Trainer 
 from dataloader import PreTrainDataLoader
 
 def run_pretraining(args, num_iters=5e5):
@@ -71,6 +71,8 @@ def run_pretraining(args, num_iters=5e5):
 	else:
 		lowrank = False
 	model = Bert2BertSynCtrl(config_model, args.random_seed)
+	if torch.cuda.device_count() > 1:
+		model = nn.DataParallel(model)
 	model = model.to(device)
 	dataloader = PreTrainDataLoader(args.random_seed,
 									args.datapath,
@@ -88,7 +90,7 @@ def run_pretraining(args, num_iters=5e5):
 				optimizer,
 				lambda steps: min((steps+1)/warmup_steps,1))
 	batch_size = config['batch_size']
-	trainer = PreTrainer(model,
+	trainer = Trainer(model,
 						optimizer,
 						dataloader,
 						args.op_path,

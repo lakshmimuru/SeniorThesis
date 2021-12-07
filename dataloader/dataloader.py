@@ -46,7 +46,7 @@ class PreTrainDataLoader:
 			target_data = self.data_init[target_id] 
 			red_data = np.delete(self.data_init,self.target_id,0)
 			red_data[:,:,:self.cont_dim] = low_rank(red_data[:,:,:self.cont_dim],pct_to_keep)
-			self.data = np.insert(red_data,target_data,0)	
+			self.data = np.insert(red_data,target_id,target_data,0)	
 		else:
 			self.data = self.data_init
 		self.seqs = config.seq_range
@@ -155,7 +155,7 @@ class PreTrainDataLoader:
 				attention_masks_postint, targets_cont, targets_discrete
 
 
-class FinetuneDataloader(object):
+class FinetuneDataLoader(object):
 
 	def __init__(self, seed, dir_path, device, config, target_id, interv_time, lowrank_approx = False, pct_to_keep = 50):
 
@@ -187,7 +187,7 @@ class FinetuneDataloader(object):
 			self.data = np.concatenate((red_data,self.target_data.reshape(1,-1,self.feature_dim)),0)
 		self.seqs = config.seq_range
 		self.target_id = target_id
-		self.seq_pool = [i for i in range(self.seqs) if i ]
+		self.seq_pool = [i for i in range(self.seqs) if i!=self.target_id]
 		self.time_range = config.time_range
 		self.time_ids = np.arange(self.time_range)
 
@@ -205,6 +205,7 @@ class FinetuneDataloader(object):
 		attention_masks_preint = torch.zeros(batch_size,self.K,self.pre_int_len)
 		attention_masks_postint = torch.zeros(batch_size,self.K,self.post_int_len)
 		targets_cont = torch.zeros(batch_size,self.post_int_len,1)
+		seq_ids = np.asarray(self.seq_pool+[self.target_id])
 		
 		if self.discrete_dim>0:
 			targets_discrete = torch.zeros(batch_size,self.post_int_len,self.discrete_dim) 
@@ -217,13 +218,14 @@ class FinetuneDataloader(object):
 
 				print( len(self.seq_pool),self.K)
 
-			interv_time = np.random.randint(self.interv_time)
+			interv_time = np.random.randint(self.interv_time-1)
 			pre_int_seq = self.data[:,interv_time - self.pre_int_len:interv_time]
-			post_int_seq = self.data[:,interv_time:interv_time+self.post_int_len]
+			post_int_lim = min(self.interv_time,interv_time+self.post_int_len)
+			post_int_seq = self.data[:,interv_time:post_int_lim]
 			timestamp_preint = np.repeat(self.time_ids[interv_time - self.pre_int_len:interv_time].reshape(1,-1),self.K,axis=0)
 
 			timestamp_postint = np.repeat(self.time_ids[interv_time:\
-								interv_time+self.post_int_len].reshape(1,-1),self.K,axis=0)
+								post_int_lim].reshape(1,-1),self.K,axis=0)
 			
 			attention_mask_preint = np.ones(timestamp_preint.shape)
 			attention_mask_postint = np.ones(timestamp_postint.shape)
