@@ -13,7 +13,7 @@ import torch.nn as nn
 
 class PreTrainer:
 
-	def __init__(self,
+    def __init__(self,
 				model,
 				optimizer, 
 				dataloader,
@@ -21,44 +21,44 @@ class PreTrainer:
 				batch_size,
 				scheduler=None,
 				log_freq = 100):
-		
-		self.model = model
-		self.config = model.config
-		self.optimizer = optimizer
-		self.scheduler = scheduler
-		self.train_loader = dataloader
-		#self.eval_loader = dataloader_eval
-		self.loss_fn_cont = nn.MSELoss()
-		self.loss_fn_discrete = nn.BCEWithLogitsLoss()
-		self.output_file= output_file
-		self.batch_size= batch_size
-		self.log_freq = log_freq
+        
+        self.model = model
+  		self.config = model.config
+        self.optimizer = optimizer
+        self.scheduler = scheduler
+        self.train_loader = dataloader
+        #self.eval_loader = dataloader_eval
+        self.loss_fn_cont = nn.MSELoss()
+        self.loss_fn_discrete = nn.BCEWithLogitsLoss()
+        self.output_file= output_file
+        self.batch_size= batch_size
+        self.log_freq = log_freq
   
 
 
-	def train(self, num_iters, load_from_checkpoint = None):
+    def train(self, num_iters, load_from_checkpoint = None):
 
-		self.model.train()
-		log = dict()
-		start_iter = 0
+    	self.model.train()
+    	log = dict()
+    	start_iter = 0
 
-		if load_from_checkpoint is not None:
-			
-			checkpoint = torch.load(checkpoint)
-			self.model.load_state_dict(checkpoint['model_state_dict'])
-			self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-			start_iter = checkpoint['iters']+1
-			log = checkpoint['logs']
-			if self.scheduler is not None:
-				self.scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
-		
-		loss_accumulate = []
+    	if load_from_checkpoint is not None:
+    		
+    		checkpoint = torch.load(checkpoint)
+    		self.model.load_state_dict(checkpoint['model_state_dict'])
+    		self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    		start_iter = checkpoint['iters']+1
+    		log = checkpoint['logs']
+    		if self.scheduler is not None:
+    			self.scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
+    	
+    	loss_accumulate = []
 
-		for i in range(start_iter,start_iter+num_iters):
-			
-			pre_int_seq, post_int_seq, timestamps_pre_int, timestamps_post_int, seq_ids_pre_int, \
-			seq_ids_post_int, target_pre_int, target_post_int, attention_mask_pre_int, \
-			attention_mask_post_int, target_cont, target_discrete = self.train_loader.get_batch(self.batch_size)
+    	for i in range(start_iter,start_iter+num_iters):
+    		
+			pre_int_seq, post_int_seq, timestamps_pre_int, timestamps_post_int, seq_ids_pre_int, 
+				seq_ids_post_int, target_pre_int, target_post_int, attention_mask_pre_int, attention_mask_post_int, 
+				target_cont, target_discrete = self.train_loader.get_batch(self.batch_size)
 				
 			
 
@@ -74,7 +74,7 @@ class PreTrainer:
 												  attention_mask_post_int,)
 
 			target_cont_mask = target_cont[attention_mask_post_int[:,self.config.K-1]]
-			cont_pred_mask = cont_pred[attention_mask_post_int[:,self.config.K-1]]
+			cont_pred_mask = cont_pred_mask[attention_mask_post_int[:,self.config.K-1]]
 
 			loss_cont = self.loss_fn_cont(cont_pred_mask,target_cont_mask)
 			loss_discrete = 0
@@ -90,11 +90,11 @@ class PreTrainer:
 			loss_accumulate.append(loss.item())
 			
 			if self.scheduler is not None:
-				self.scheduler.step()
+ 				self.scheduler.step()
 
-			if i%self.log_freq == 0:
+            if i%self.log_freq == 0:
 
-				loss_accumulate = np.array(loss_accumulate)
+            	loss_accumulate = np.array(loss_accumulate)
 				log[str(i)] = {'train_loss_mean':np.mean(loss_accumulate),'train_loss_std':np.std(loss_accumulate)}
 				print(f'Iteration:{i}\tLoss_mean:{np.mean(loss_accumulate)}\tLoss_std:{np.std(loss_accumulate)}')
 				loss_accumulate = []
@@ -107,7 +107,7 @@ class PreTrainer:
 				if self.scheduler is not None:
 					checkpoint['scheduler_state_dict'] = self.scheduler.state_dict()
 
-				torch.save(checkpoint,self.output_file+'model.pth')
+				torch.save(checkpoint,self.output_file+str('model.pth')
 				
 
 
@@ -137,8 +137,8 @@ class PreTrainer:
 
 
 
-	   
+       
 
 
 
-		
+   		
