@@ -39,6 +39,7 @@ class PreTrainDataLoader:
 		self.post_int_len = config.post_int_len
 		self.cont_dim = config.cont_dim
 		self.discrete_dim = config.discrete_dim
+		self.target_id = target_id
 		self.data_init = np.float32(np.load(dir_path+'data.npy',allow_pickle=True))
 		self.mask = np.load(dir_path+'mask.npy',allow_pickle=True)
 		self.data_init[self.mask] = 0
@@ -50,7 +51,6 @@ class PreTrainDataLoader:
 		else:
 			self.data = self.data_init
 		self.seqs = config.seq_range
-		self.target_id = target_id
 		self.seq_pool = [i for i in range(len(self.data.shape[0])) if i!=self.target_id]
 		self.time_range = config.time_range
 		self.time_ids = np.arange(self.time_range)
