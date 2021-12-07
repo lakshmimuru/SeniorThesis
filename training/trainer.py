@@ -55,9 +55,9 @@ class Trainer:
 
         for i in range(start_iter,start_iter+num_iters):
             
-            pre_int_seq, post_int_seq, timestamps_pre_int, timestamps_post_int, seq_ids_pre_int, 
-                seq_ids_post_int, target_pre_int, target_post_int, attention_mask_pre_int, attention_mask_post_int, 
-                target_cont, target_discrete = self.train_loader.get_batch(self.batch_size)
+            pre_int_seq, post_int_seq, timestamps_pre_int, timestamps_post_int, seq_ids_pre_int,\
+            seq_ids_post_int, target_pre_int, target_post_int, attention_mask_pre_int, attention_mask_post_int, \
+            target_cont, target_discrete = self.train_loader.get_batch(self.batch_size)
                 
             
 
