@@ -51,7 +51,7 @@ class PreTrainDataLoader:
 		else:
 			self.data = self.data_init
 		self.seqs = config.seq_range
-		self.seq_pool = [i for i in range(len(self.data.shape[0])) if i!=self.target_id]
+		self.seq_pool = [i for i in range(self.data.shape[0]) if i!=self.target_id]
 		self.time_range = config.time_range
 		self.time_ids = np.arange(self.time_range)
 
