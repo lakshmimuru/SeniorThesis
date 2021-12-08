@@ -42,7 +42,9 @@ def run_pretraining(args, num_iters=5e5):
 		target_id = 2 #california has index 2
 		classes = None 
 
-	#elif exp_name == 'retail':
+	elif exp_name == 'retail':
+		target_id = 
+		classes = None
 
 	#elif exp_name == 'cricket':
 

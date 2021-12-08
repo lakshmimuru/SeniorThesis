@@ -32,17 +32,17 @@ def run_pretraining(args, num_iters=5e5):
 	
 	elif exp_name == 'basque':
 		target_id = 16#basque county has index 16
-		interv_time = 
+		interv_time = 15
 		classes = None 
 
 	elif exp_name == 'germany':
 		target_id = 6# west germany has index 6
-		interv_time = 
+		interv_time = 30
 		classes = None 
 
 	elif exp_name == 'prop99':
 		target_id = 2 #california has index 2
-		interv_time = 
+		interv_time = 18
 		classes = None 
 
 	#elif exp_name == 'retail':
@@ -105,7 +105,7 @@ def run_pretraining(args, num_iters=5e5):
 						batch_size
 						)
 
-	print(f'Running training with batch_size {batch_size}')
+	print(f'Running finetuning with batch_size {batch_size}')
 
 	trainer.train(int(num_iters),args.checkpoint)
 

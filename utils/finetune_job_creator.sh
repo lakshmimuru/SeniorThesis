@@ -30,6 +30,7 @@ Help()
    echo -e "${YELLOW}-o${ENDC} | ${YELLOW}--op_path${ENDC} [default = ${GREEN}\"../logs_dir/lunarlander/\"${ENDC}] Output directory"
    echo -e "${YELLOW}-s${ENDC} | ${YELLOW}--random_seed${ENDC} [default = ${GREEN}\"0\"${ENDC}] Random Seed"
    echo -e "${YELLOW}-d${ENDC} | ${YELLOW}--datapath${ENDC} [default = ${GREEN}\".../dataSets/LunarLander/llander_file1.npz\"${ENDC}] Datapath"
+   echo -e "${YELLOW}-m${ENDC} | ${YELLOW}--modelpath${ENDC} [default = ${GREEN}\".../dataSets/LunarLander/llander_file1.npz\"${ENDC}] Datapath"
    echo -e "${YELLOW}-h${ENDC} | ${YELLOW}--help${ENDC} Call this help message"
    echo
 }
@@ -82,6 +83,11 @@ case "$1" in
         checkpoint=$1
         shift
        ;;
+    -m | --modelpath)
+        shift
+        modelpath=$1
+        shift
+        ;;
     -d | --datapath)
     		shift
     		datapath=$1
@@ -135,7 +141,7 @@ module purge
 module load anaconda3/2020.7
 conda activate txf_design-space
 cd ..
-cd experiment finetune.py --exp_name ${exp} --datapath ${datapath} --config ${config} --op_path ${op_path} --random_seed ${random_seed}"> $job_file
+cd experiment finetune.py --exp_name ${exp} --datapath ${datapath} --modelpath ${modelpath} --config ${config} --op_path ${op_path} --random_seed ${random_seed}"> $job_file
 
 sbatch $job_file
 
