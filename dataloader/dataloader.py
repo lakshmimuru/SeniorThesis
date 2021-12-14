@@ -48,8 +48,8 @@ class PreTrainDataLoader:
 		if lowrank_approx:	
 			red_data[:,:,:self.cont_dim] = low_rank(red_data[:,:,:self.cont_dim],pct_to_keep)
 			#fraction adjust estimator
-			data_min = np.amin(red_data.reshape(-1,self.feature_min),0)
-			data_max = np.amax(red_data.reshape(-1,self.feature_min),0)
+			data_min = np.amin(red_data.reshape(-1,self.feature_min),0)[:cont_dim]
+			data_max = np.amax(red_data.reshape(-1,self.feature_min),0)[:cont_dim]
 			self.data = np.insert(red_data,target_id,target_data,0)	
 			self.data[:,:,:cont_dim] = (self.data[:,:,:cont_dim] - data_min)/(data_max - data_min)
 
@@ -187,8 +187,8 @@ class FinetuneDataLoader(object):
 		if lowrank_approx:
 			red_data[:,:,:self.cont_dim] = low_rank(red_data[:,:,:self.cont_dim],pct_to_keep)
 			#fraction adjust estimator
-			data_min = np.amin(red_data.reshape(-1,self.feature_min),0)
-			data_max = np.amax(red_data.reshape(-1,self.feature_min),0)
+			data_min = np.amin(red_data.reshape(-1,self.feature_min),0)[:cont_dim]
+			data_max = np.amax(red_data.reshape(-1,self.feature_min),0)[:cont_dim]
 			self.data = np.concatenate((red_data,self.target_data.reshape(1,-1,self.feature_dim)),0)
 			self.data[:,:,:cont_dim] = (self.data[:,:,:cont_dim] - data_min)/(data_max - data_min)
 
