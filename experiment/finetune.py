@@ -16,7 +16,7 @@ from transformers import BertConfig
 from trainer import Trainer 
 from dataloader import FinetuneDataLoader
 
-def run_pretraining(args, num_iters=5e5):
+def run_finetuning(args, num_iters=5e5):
 
 	device = torch.device('cuda:0' if torch.cuda.is_available else "cpu")	
 
@@ -110,7 +110,6 @@ def run_pretraining(args, num_iters=5e5):
 	trainer.train(int(num_iters),args.checkpoint)
 
 
-
 def main():
 
 	'''Pretrains Bert2Bert synthetic ctrl txf'''
@@ -126,7 +125,7 @@ def main():
 	parser.add_argument('--checkpoint',type=str,default=None)
 	parser.add_argument('--data_transform',type=str,default=None)
 	args = parser.parse_args()
-	run_pretraining(args)
+	run_finetuning(args)
 
 if __name__ == "__main__":
     main()
