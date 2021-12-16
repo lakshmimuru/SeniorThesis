@@ -129,43 +129,29 @@ class Bert2BertSynCtrl(nn.Module):
 				target_pre_int, 
 				target_post_int,
 				attention_mask_pre_int, 
-				attention_mask_post_int,):
+				attention_mask_post_int,
+				pred_index):
 
 		'''
 		Generate next time step's post-int target prediction
 		'''
 
-		pre_int_seq_length = pre_int_seq.shape[1]
-		post_int_seq_length = post_int_seq.shape[1]
-
-		if self.post_int_len > post_int_seq_length:
-
-			pad_len = self.post_int_len - post_int_seq_length
-			device = torch.get_device(post_int_seq_length)
-			post_int_seq = torch.cat((post_int_seq
-											,torch.zeros(1,self.K,pad_len,self.feature_dim).to(device)),dim=2)
-
-			timestamps_post_int = torch.cat((timestamps_post_int,
-								torch.zeros(1,self.K,pad_len).to(device)),dim=2)
-			seq_ids_post_int = torch.cat((seq_ids_post_int,
-								torch.zeros(1,self.K,pad_len).to(device)),dim=2)
-			attention_mask_post_int = torch.cat((attention_mask_post_int,
-								torch.zeros(1,self.K,pad_len).to(device)),dim=2)
-		outputs_cont, outputs_discrete = self.forward(pre_int_seq, 
-							post_int_seq,
-							timestamps_pre_int, 
-							timestamps_post_int, 
-							seq_ids_pre_int, 
-							seq_ids_post_int, 
-							target_pre_int, 
-							target_post_int,
-							attention_mask_pre_int, 
-							attention_mask_post_int)
+		with torch.no_grad():
+			outputs_cont, outputs_discrete = self.forward(pre_int_seq, 
+								post_int_seq,
+								timestamps_pre_int, 
+								timestamps_post_int, 
+								seq_ids_pre_int, 
+								seq_ids_post_int, 
+								target_pre_int, 
+								target_post_int,
+								attention_mask_pre_int, 
+								attention_mask_post_int)
 
 		if outputs_discrete is not None:
-			outputs_discrete = torch.stack([torch.argmax(pred[0,post_int_seq_length-1]).reshape(1,-1) for pred in outputs_discrete],dim=1).reshape(-1)
+			outputs_discrete = torch.stack([torch.argmax(pred[0,pred_index]).reshape(1,-1) for pred in outputs_discrete],dim=1).reshape(-1)
 			
-		return outputs_cont[0,post_int_seq_length-1], outputs_discrete 
+		return outputs_cont[0, pred_index], outputs_discrete 
 
 
 

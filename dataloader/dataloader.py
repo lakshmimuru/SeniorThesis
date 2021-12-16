@@ -233,7 +233,7 @@ class FinetuneDataLoader(object):
 
 			interv_time = np.random.randint(self.interv_time-1)
 			pre_int_seq = self.data[:,interv_time - self.pre_int_len:interv_time]
-			post_int_lim = min(self.interv_time,interv_time+self.post_int_len)
+			post_int_lim = min(self.time_range,interv_time+self.post_int_len)
 			post_int_seq = self.data[:,interv_time:post_int_lim]
 			timestamp_preint = np.repeat(self.time_ids[interv_time - self.pre_int_len:interv_time].reshape(1,-1),self.K,axis=0)
 
