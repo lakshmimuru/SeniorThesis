@@ -48,14 +48,14 @@ class PreTrainDataLoader:
 		if lowrank_approx:	
 			red_data[:,:,:self.cont_dim] = low_rank(red_data[:,:,:self.cont_dim],pct_to_keep)
 			#fraction adjust estimator
-			data_min = np.amin(red_data.reshape(-1,self.feature_min),0)[:self.cont_dim]
-			data_max = np.amax(red_data.reshape(-1,self.feature_min),0)[:self.cont_dim]
+			data_min = np.amin(red_data.reshape(-1,self.feature_dim),0)[:self.cont_dim]
+			data_max = np.amax(red_data.reshape(-1,self.feature_dim),0)[:self.cont_dim]
 			self.data = np.insert(red_data,target_id,target_data,0)	
 			self.data[:,:,:self.cont_dim] = (self.data[:,:,:self.cont_dim] - data_min)/(data_max - data_min)
 
 		else:
-			data_min = np.amin(red_data.reshape(-1,self.feature_min),0)[:self.cont_dim]
-			data_max = np.amax(red_data.reshape(-1,self.feature_min),0)[:self.cont_dim]
+			data_min = np.amin(red_data.reshape(-1,self.feature_dim),0)[:self.cont_dim]
+			data_max = np.amax(red_data.reshape(-1,self.feature_dim),0)[:self.cont_dim]
 			self.data = self.data_init
 			self.data[:,:,:self.cont_dim] = (self.data[:,:,:self.cont_dim] - data_min)/(data_max - data_min)	
 		self.seqs = config.seq_range
@@ -182,22 +182,22 @@ class FinetuneDataLoader(object):
 		self.data_init = np.float32(np.load(dir_path+'data.npy',allow_pickle=True))
 		self.mask = np.load(dir_path+'mask.npy',allow_pickle=True)
 		self.data_init[self.mask] = 0
-		target_data = self.data_init[target_id]
-		red_data = np.delete(self.data_init,self.target_id,0)
+		self.target_data = self.data_init[target_id]
+		red_data = np.delete(self.data_init,target_id,0)
 		if lowrank_approx:
 			red_data[:,:,:self.cont_dim] = low_rank(red_data[:,:,:self.cont_dim],pct_to_keep)
 			#fraction adjust estimator
-			data_min = np.amin(red_data.reshape(-1,self.feature_min),0)[:self.cont_dim]
-			data_max = np.amax(red_data.reshape(-1,self.feature_min),0)[:self.cont_dim]
+			data_min = np.amin(red_data.reshape(-1,self.feature_dim),0)[:self.cont_dim]
+			data_max = np.amax(red_data.reshape(-1,self.feature_dim),0)[:self.cont_dim]
 			self.data = np.concatenate((red_data,self.target_data.reshape(1,-1,self.feature_dim)),0)
 			self.data[:,:,:self.cont_dim] = (self.data[:,:,:self.cont_dim] - data_min)/(data_max - data_min)
 
 		else:
-			data_min = np.amin(red_data.reshape(-1,self.feature_min),0)
-			data_max = np.amax(red_data.reshape(-1,self.feature_min),0)
+			data_min = np.amin(red_data.reshape(-1,self.feature_dim),0)
+			data_max = np.amax(red_data.reshape(-1,self.feature_dim),0)
 			self.data = np.concatenate((red_data,self.target_data.reshape(1,-1,self.feature_dim)),0)
 			self.data[:,:,:self.cont_dim] = (self.data[:,:,:self.cont_dim] - data_min)/(data_max - data_min)
-		self.data[self.K-1,:,1:cont_dim] = 0
+		self.data[self.K-1,:,1:self.cont_dim] = 0
 		self.seqs = config.seq_range
 		self.target_id = target_id
 		self.seq_pool = [i for i in range(self.seqs) if i!=self.target_id]
@@ -227,11 +227,7 @@ class FinetuneDataLoader(object):
 
 		for i in range(batch_size):
 
-			if len(self.seq_pool) <self.K:
-
-				print( len(self.seq_pool),self.K)
-
-			interv_time = np.random.randint(self.interv_time-1)
+			interv_time = np.random.randint(self.pre_int_len,self.interv_time-1)
 			pre_int_seq = self.data[:,interv_time - self.pre_int_len:interv_time]
 			post_int_lim = min(self.time_range,interv_time+self.post_int_len)
 			post_int_seq = self.data[:,interv_time:post_int_lim]

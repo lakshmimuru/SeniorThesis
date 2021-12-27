@@ -22,11 +22,10 @@ class Generator:
     def __init__(self,
 				model,
 				device,
-				output_file,
 				dir_path,
 				target_id,
 				interv_time,
-				lowrank_approx,
+				lowrank_approx
 				):
 
 		self.model = model
@@ -124,16 +123,14 @@ class Generator:
 			else:
 				post_int_seq[0,i,0] = cont_target
 
-		self.target_data[interv_time:post_int_lim,0] = post_int_seq[0,:post_int_lim - interv_time,0]
-		self.target_data[interv_time:post_int_lim,cont_dim:] = post_int_seq[0,:post_int_lim - interv_time,cont_dim:]
+		self.target_data[interv_time:post_int_lim,0] = post_int_seq[0,:post_int_lim - interv_time,0].cpu().numpy()
+		self.target_data[interv_time:post_int_lim,cont_dim:] = post_int_seq[0,:post_int_lim - interv_time,cont_dim:].cpu().numpy()
 
 
 	def sliding_window_generate(self):
 
 		for i in range(self.interv_time,self.time_range,self.post_int_len):
-
 			self.generate_post_int(i)
-
 		return self.target_data
 
 

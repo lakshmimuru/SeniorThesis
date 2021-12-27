@@ -16,7 +16,7 @@ from transformers import BertConfig
 from trainer import Trainer 
 from dataloader import PreTrainDataLoader
 
-def run_pretraining(args, num_iters=5e5):
+def run_pretraining(args, num_iters=5e4):
 
 	device = torch.device('cuda:0' if torch.cuda.is_available else "cpu")	
 
@@ -30,23 +30,25 @@ def run_pretraining(args, num_iters=5e5):
 		target_id = args.target_index
 		classes = None 
 	
-	elif exp_name == 'basque':
+	elif args.exp_name == 'basque':
 		target_id = 16#basque county has index 16
 		classes = None 
 
-	elif exp_name == 'germany':
+	elif args.exp_name == 'germany':
 		target_id = 6# west germany has index 6
 		classes = None 
 
-	elif exp_name == 'prop99':
+	elif args.exp_name == 'prop99':
 		target_id = 2 #california has index 2
 		classes = None 
-
+	'''
 	elif exp_name == 'retail':
 		target_id = 
 		classes = None
 
 	#elif exp_name == 'cricket':
+
+	'''
 
 	config_model = BertConfig(hidden_size = config['hidden_size'],
 							num_hidden_layers = config['n_layers'],
@@ -111,12 +113,12 @@ def main():
 	'''Pretrains Bert2Bert synthetic ctrl txf'''
 	parser = argparse.ArgumentParser(description='Experiment parameters',
 									formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-	parser.add_argument('--exp_name',type=str,default='lunarlander')
+	parser.add_argument('--exp_name',type=str,default='basque')
 	parser.add_argument('--datapath',type=str,default='')
 	parser.add_argument('--config',type=str, default='')
 	parser.add_argument('--op_path',type=str,default='')
 	parser.add_argument('--random_seed',type=int,default=0)
-	parser.add_argument('--target_index',type=int,default=0)
+	parser.add_argument('--target_index',type=int,default=None)
 	parser.add_argument('--checkpoint',type=str,default=None)
 	parser.add_argument('--data_transform',type=str,default=None)
 	args = parser.parse_args()
