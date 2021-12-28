@@ -19,7 +19,7 @@ from dataloader import FinetuneDataLoader
 
 class Generator:
 
-    def __init__(self,
+	def __init__(self,
 				model,
 				device,
 				dir_path,
@@ -64,7 +64,7 @@ class Generator:
 		self.seq_ids = np.asarray(self.seq_pool+[self.target_id])
 		self.time_ids = np.arange(self.time_range)
 
-    def generate_post_int(self,interv_time):
+	def generate_post_int(self,interv_time):
 
 		pre_int_seq_donor = self.data[:,interv_time - self.pre_int_len:interv_time]
 		pre_int_seq_target = self.target_data[interv_time - self.pre_int_len:interv_time]
@@ -97,7 +97,7 @@ class Generator:
 
 		pre_int_seq = torch.unsqueeze(torch.from_numpy(pre_int_seq).to(dtype = torch.float32,device=self.device),0)
 		post_int_seq = torch.unsqueeze(torch.from_numpy(post_int_seq).to(dtype = torch.float32,device=self.device),0)
-		seqid_pre_int  torch.unsqueeze((seqid_pre_int).to(dtype = torch.long,device=self.device),0)
+		seqid_pre_int = torch.unsqueeze((seqid_pre_int).to(dtype = torch.long,device=self.device),0)
 		seqid_post_int = torch.unsqueeze(torch.from_numpy(seqid_post_int).to(dtype = torch.long,device=self.device),0)
 		timestamp_preint = torch.unsqueeze(timestamp_preint.from_numpy(timestamp_preint).to(dtype = torch.long,device=self.device),0)
 		timestamp_postint = torch.unsqueeze(timestamp_postint.from_numpy(timestamp_postint).to(dtype = torch.long,device=self.device),0)
