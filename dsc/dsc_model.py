@@ -30,7 +30,7 @@ class DSCModel(object):
 				random_seed,
 				datapath,
 				device,
-				lowrank = False,
+				lowrank=False,
 				classes=None):
 
 		self.model = model
@@ -161,6 +161,12 @@ class DSCModel(object):
 		print('Fitting model on target unit')
 
 		self.model = trainer.train(int(num_iters))
+
+	def load_model_from_checkpoint(self,modelpath):
+
+		cp = torch.load(modelpath)
+		state_dict = cp['model_state_dict']
+		self.model.load_state_dict(state_dict)
 
 
 

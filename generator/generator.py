@@ -84,7 +84,6 @@ class Generator:
 		attention_mask_preint = np.ones(timestamp_preint.shape)
 		attention_mask_postint = np.ones(timestamp_postint.shape)
 		
-
 		if post_int_seq.shape[1]<self.post_int_len:
 			seqlen = post_int_seq.shape[1]
 			post_int_seq = np.concatenate([np.zeros((self.K,self.post_int_len-seqlen\
