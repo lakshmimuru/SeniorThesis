@@ -11,6 +11,7 @@ sys.path.append('../models/')
 sys.path.append('../training/')
 sys.path.append('../dataloader/')
 sys.path.append('../transformers/src/')
+from collections import OrderedDict
 from bert2bert import Bert2BertSynCtrl
 from transformers import BertConfig
 from trainer import Trainer 

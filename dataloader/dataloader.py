@@ -7,7 +7,7 @@ import random
 
 def low_rank(data, pct_to_keep):
 
-	data_flat = data.reshape(len(data),-1) # N x K x T  -->  N x KT
+	data_flat = data.reshape(len(data),-1) 
 	u, s, v = np.linalg.svd(data_flat.astype(float))
 
 	k = int(np.rint(len(s)*pct_to_keep/100))
@@ -105,18 +105,20 @@ class PreTrainDataLoader:
 			attention_mask_postint = np.ones(timestamp_postint.shape)
 
 			if pre_int_seq.shape[1]<self.pre_int_len:
-				pre_int_seq = np.concatenate((np.zeros((self.K,self.pre_int_len-pre_int_seq.shape[1]\
+				seqlen = pre_int_seq.shape[1]
+				pre_int_seq = np.concatenate((np.zeros((self.K,self.pre_int_len-seqlen\
 							,self.feature_dim)),pre_int_seq),axis=1)
 
-				timestamp_preint = np.concatenate((np.zeros((self.K,self.pre_int_len-pre_int_seq.shape[1])),timestamp_preint),axis=1)
-				attention_mask_preint = np.concatenate((np.zeros((self.K,self.pre_int_len-pre_int_seq.shape[1])),attention_mask_preint),axis=1)
+				timestamp_preint = np.concatenate((np.zeros((self.K,self.pre_int_len-seqlen)),timestamp_preint),axis=1)
+				attention_mask_preint = np.concatenate((np.zeros((self.K,self.pre_int_len-seqlen)),attention_mask_preint),axis=1)
 
 			if post_int_seq.shape[1]<self.post_int_len:
-				post_int_seq = np.concatenate((np.zeros((self.K,self.post_int_len-post_int_seq.shape[1]\
+				seqlen = post_int_seq.shape[1]
+				post_int_seq = np.concatenate((np.zeros((self.K,self.post_int_len-seqlen\
 							,self.feature_dim)),post_int_seq),axis=1)
 
-				timestamp_postint = np.concatenate((np.zeros((self.K,self.post_int_len-post_int_seq.shape[1])),timestamp_postint),axis=1)
-				attention_mask_postint = np.concatenate((np.zeros((self.K,self.post_int_len-post_int_seq.shape[1])),attention_mask_postint),axis=1)
+				timestamp_postint = np.concatenate((np.zeros((self.K,self.post_int_len-seqlen)),timestamp_postint),axis=1)
+				attention_mask_postint = np.concatenate((np.zeros((self.K,self.post_int_len-seqlen)),attention_mask_postint),axis=1)
 
 
 			seqid_pre_int = np.repeat(np.asarray(seq_ids).reshape(-1,1),self.pre_int_len,axis=1)
@@ -186,7 +188,6 @@ class FinetuneDataLoader(object):
 		red_data = np.delete(self.data_init,target_id,0)
 		if lowrank_approx:
 			red_data[:,:,:self.cont_dim] = low_rank(red_data[:,:,:self.cont_dim],pct_to_keep)
-			#fraction adjust estimator
 			data_min = np.amin(red_data.reshape(-1,self.feature_dim),0)[:self.cont_dim]
 			data_max = np.amax(red_data.reshape(-1,self.feature_dim),0)[:self.cont_dim]
 			self.data = np.concatenate((red_data,self.target_data.reshape(1,-1,self.feature_dim)),0)
@@ -240,18 +241,20 @@ class FinetuneDataLoader(object):
 			attention_mask_postint = np.ones(timestamp_postint.shape)
 
 			if pre_int_seq.shape[1]<self.pre_int_len:
-				pre_int_seq = np.concatenate((np.zeros((self.K,self.pre_int_len-pre_int_seq.shape[1]\
+				seqlen = pre_int_seq.shape[1]
+				pre_int_seq = np.concatenate((np.zeros((self.K,self.pre_int_len-seqlen\
 							,self.feature_dim)),pre_int_seq),axis=1)
 
-				timestamp_preint = np.concatenate((np.zeros((self.K,self.pre_int_len-pre_int_seq.shape[1])),timestamp_preint),axis=1)
-				attention_mask_preint = np.concatenate((np.zeros((self.K,self.pre_int_len-pre_int_seq.shape[1])),attention_mask_preint),axis=1)
+				timestamp_preint = np.concatenate((np.zeros((self.K,self.pre_int_len-seqlen)),timestamp_preint),axis=1)
+				attention_mask_preint = np.concatenate((np.zeros((self.K,self.pre_int_len-seqlen)),attention_mask_preint),axis=1)
 
 			if post_int_seq.shape[1]<self.post_int_len:
-				post_int_seq = np.concatenate((np.zeros((self.K,self.post_int_len-post_int_seq.shape[1]\
+				seqlen = post_int_seq.shape[1]
+				post_int_seq = np.concatenate((np.zeros((self.K,self.post_int_len-seqlen\
 							,self.feature_dim)),post_int_seq),axis=1)
 
-				timestamp_postint = np.concatenate((np.zeros((self.K,self.post_int_len-post_int_seq.shape[1])),timestamp_postint),axis=1)
-				attention_mask_postint = np.concatenate((np.zeros((self.K,self.post_int_len-post_int_seq.shape[1])),attention_mask_postint),axis=1)
+				timestamp_postint = np.concatenate((np.zeros((self.K,self.post_int_len-seqlen)),timestamp_postint),axis=1)
+				attention_mask_postint = np.concatenate((np.zeros((self.K,self.post_int_len-seqlen)),attention_mask_postint),axis=1)
 
 
 			seqid_pre_int = np.repeat(np.asarray(seq_ids).reshape(-1,1),self.pre_int_len,axis=1)

@@ -64,38 +64,39 @@ class DSCModel(object):
 
 		self.model = Bert2BertSynCtrl(self.config_model, random_seed)
 		self.model = self.model.to(device)
+		if not(os.path.exists(op_dir)):
+			os.mkdir(op_dir)
 
 
 	def fit(self, interv_time, checkpoint_pretrain = None):
 
 		self.pretrain(checkpoint_pretrain)
+
 		if self.model.Bert2BertSynCtrl.config.encoder.K == self.config['K']:
+
+			print('Modifying K')
+			self.model.config.K+=1
+			self.model.K+=1
 			self.model.Bert2BertSynCtrl.encoder.config.K+=1
 			self.model.Bert2BertSynCtrl.decoder.config.K+=1
-			self.model.Bert2BertSynCtrl.config.encoder.K+=1
-			self.model.Bert2BertSynCtrl.config.decoder.K+=1
+
 		self.finetune(interv_time)
 
 	def predict(self, interv_time):
 
-		generator = Generator(model,
-						device,
+		generator = Generator(self.model,
+						self.device,
 						self.datapath,
 						self.target_id,
 						interv_time,
 						self.lowrank)
 
 		target_data =  generator.sliding_window_generate()
-		 
+
+		return target_data
 
 
-
-
-
-
-
-
-	def pretrain(self, checkpoint_pretrain, numiters=5e4):
+	def pretrain(self, checkpoint_pretrain, num_iters=1e1):
 
 
 		dataloader_pretrain = PreTrainDataLoader(self.random_seed,
@@ -109,12 +110,13 @@ class DSCModel(object):
 									lr=eval(self.config['lr']),
 									weight_decay=eval(self.config['weight_decay']),
 									)
+
 		warmup_steps = self.config['warmup_steps']
 		scheduler = torch.optim.lr_scheduler.LambdaLR(
-					optimizer,
+					optimizer_pretrain,
 					lambda steps: min((steps+1)/warmup_steps,1))
 		batch_size = self.config['batch_size']
-		op_path_pretrain = self.op_path + 'pretrain/'
+		op_path_pretrain = self.op_dir + 'pretrain/'
 		if not(os.path.exists(op_path_pretrain)):
 			os.mkdir(op_path_pretrain)
 
@@ -126,12 +128,12 @@ class DSCModel(object):
 						scheduler
 						)
 
-		print('Pretraining Model')
+		print('Pretraining model on donor units')
 
 		self.model = trainer_pretrain.train(int(num_iters),checkpoint_pretrain)
 
 
-	def finetune(self, interv_time, num_iters=1e4):
+	def finetune(self, interv_time, num_iters=1e1):
 
 		dataloader_finetune = FinetuneDataLoader(self.random_seed,
 									self.datapath,
@@ -146,7 +148,7 @@ class DSCModel(object):
 								weight_decay=eval(self.config['weight_decay']),
 									)
 		batch_size = self.config['batch_size']
-		op_path_finetune = self.op_path + 'finetune/'
+		op_path_finetune = self.op_dir + 'finetune/'
 		if not(os.path.exists(op_path_finetune)):
 			os.mkdir(op_path_finetune)
 		trainer = Trainer(self.model,
@@ -155,6 +157,8 @@ class DSCModel(object):
 							op_path_finetune,
 							batch_size
 							)
+
+		print('Fitting model on target unit')
 
 		self.model = trainer.train(int(num_iters))
 

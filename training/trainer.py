@@ -107,4 +107,6 @@ class Trainer:
                     checkpoint['scheduler_state_dict'] = self.scheduler.state_dict()
 
                 torch.save(checkpoint,self.output_file+'model.pth')
+
+        return self.model
                 
