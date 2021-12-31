@@ -96,7 +96,7 @@ class DSCModel(object):
 		return target_data
 
 
-	def pretrain(self, checkpoint_pretrain, num_iters=1e1):
+	def pretrain(self, checkpoint_pretrain, num_iters=5e4):
 
 
 		dataloader_pretrain = PreTrainDataLoader(self.random_seed,
@@ -133,7 +133,7 @@ class DSCModel(object):
 		self.model = trainer_pretrain.train(int(num_iters),checkpoint_pretrain)
 
 
-	def finetune(self, interv_time, num_iters=1e1):
+	def finetune(self, interv_time, num_iters=1e4):
 
 		dataloader_finetune = FinetuneDataLoader(self.random_seed,
 									self.datapath,

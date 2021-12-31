@@ -41,7 +41,7 @@ class PreTrainDataLoader:
 		self.discrete_dim = config.discrete_dim
 		self.target_id = target_id
 		self.data_init = np.float32(np.load(dir_path+'data.npy',allow_pickle=True))
-		self.mask = np.load(dir_path+'mask.npy',allow_pickle=True)
+		self.mask = np.load(dir_path+'mask.npy',allow_pickle=True).astype(bool)
 		self.data_init[self.mask] = 0
 		target_data = self.data_init[target_id] 
 		red_data = np.delete(self.data_init,self.target_id,0)
@@ -54,8 +54,8 @@ class PreTrainDataLoader:
 			self.data[:,:,:self.cont_dim] = (self.data[:,:,:self.cont_dim] - data_min)/(data_max - data_min)
 
 		else:
-			data_min = np.amin(red_data.reshape(-1,self.feature_dim),0)[:self.cont_dim]
-			data_max = np.amax(red_data.reshape(-1,self.feature_dim),0)[:self.cont_dim]
+			data_min = np.amin(red_data.reshape(-1,self.feature_dim),0)
+			data_max = np.amax(red_data.reshape(-1,self.feature_dim),0)
 			self.data = self.data_init
 			self.data[:,:,:self.cont_dim] = (self.data[:,:,:self.cont_dim] - data_min)/(data_max - data_min)	
 		self.seqs = config.seq_range
@@ -182,7 +182,7 @@ class FinetuneDataLoader(object):
 		self.cont_dim = config.cont_dim
 		self.discrete_dim = config.discrete_dim
 		self.data_init = np.float32(np.load(dir_path+'data.npy',allow_pickle=True))
-		self.mask = np.load(dir_path+'mask.npy',allow_pickle=True)
+		self.mask = np.load(dir_path+'mask.npy',allow_pickle=True).astype(bool)
 		self.data_init[self.mask] = 0
 		self.target_data = self.data_init[target_id]
 		red_data = np.delete(self.data_init,target_id,0)
