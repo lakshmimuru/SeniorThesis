@@ -68,9 +68,10 @@ class DSCModel(object):
 			os.mkdir(op_dir)
 
 
-	def fit(self, interv_time, checkpoint_pretrain = None):
+	def fit(self, interv_time, checkpoint_pretrain = None, pretrain =True):
 
-		self.pretrain(checkpoint_pretrain)
+		if pretrain == True:
+			self.pretrain(checkpoint_pretrain)
 
 		if self.model.Bert2BertSynCtrl.config.encoder.K == self.config['K']:
 
@@ -90,6 +91,14 @@ class DSCModel(object):
 						self.target_id,
 						interv_time,
 						self.lowrank)
+
+		if self.model.Bert2BertSynCtrl.config.encoder.K == self.config['K']:
+
+			print('Modifying K')
+			self.model.config.K+=1
+			self.model.K+=1
+			self.model.Bert2BertSynCtrl.encoder.config.K+=1
+			self.model.Bert2BertSynCtrl.decoder.config.K+=1
 
 		target_data =  generator.sliding_window_generate()
 

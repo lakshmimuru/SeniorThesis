@@ -88,10 +88,6 @@ class PreTrainDataLoader:
 
 		for i in range(batch_size):
 
-			if len(self.seq_pool) <self.K:
-
-				print( len(self.seq_pool),self.K)
-
 			seq_ids = random.sample(self.seq_pool,self.K)
 			interv_time = np.random.randint(self.pre_int_len, self.time_range-self.post_int_len)
 			pre_int_seq = self.data[seq_ids,interv_time - self.pre_int_len:interv_time]

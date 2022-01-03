@@ -40,7 +40,7 @@ class Generator:
 		self.discrete_dim = self.config.discrete_dim
 		self.target_id = target_id
 		self.data_init = np.float32(np.load(dir_path+'data.npy',allow_pickle=True))
-		self.mask = np.load(dir_path+'mask.npy',allow_pickle=True)
+		self.mask = np.load(dir_path+'mask.npy',allow_pickle=True).astype(bool)
 		self.data_init[self.mask] = 0
 		self.target_data = self.data_init[target_id] 
 		red_data = np.delete(self.data_init,target_id,0)
@@ -52,12 +52,12 @@ class Generator:
 			self.data[:,:,:self.cont_dim] = (red_data[:,:,:self.cont_dim] - data_min)/(data_max - data_min)
 
 		else:
-			data_min = np.amin(red_data.reshape(-1,self.feature_dim),0)[:self.cont_dim]
-			data_max = np.amax(red_data.reshape(-1,self.feature_dim),0)[:self.cont_dim]
+			self.data_min = np.amin(red_data.reshape(-1,self.feature_dim),0)[:self.cont_dim]
+			self.data_max = np.amax(red_data.reshape(-1,self.feature_dim),0)[:self.cont_dim]
 			self.data = red_data
-			self.data[:,:,:self.cont_dim] = (red_data[:,:,:self.cont_dim] - data_min)/(data_max - data_min)	
+			self.data[:,:,:self.cont_dim] = (red_data[:,:,:self.cont_dim] - self.data_min)/(self.data_max - self.data_min)	
 
-		self.target_data[:,:self.cont_dim] = (self.target_data[:,:self.cont_dim]- data_min)/(data_max - data_min)
+		self.target_data[:,:self.cont_dim] = (self.target_data[:,:self.cont_dim]- self.data_min)/(self.data_max - self.data_min)
 		self.target_data[:,1:self.cont_dim] = 0
 		self.seqs = self.config.seq_range
 		self.time_range = self.config.time_range		
@@ -106,9 +106,10 @@ class Generator:
 		target_mask_postint = torch.unsqueeze(target_mask_postint.to(dtype=torch.long,device=self.device),0)
 		attention_mask_preint = torch.unsqueeze(torch.from_numpy(attention_mask_preint).to(dtype = torch.long,device=self.device),0)
 		attention_mask_postint = torch.unsqueeze(torch.from_numpy(attention_mask_postint).to(dtype = torch.long,device=self.device),0)
-
 		
 		for i in range(min(self.post_int_len,self.time_range-interv_time)):
+
+
 
 			cont_target, disc_target = self.model.generate_post_int(pre_int_seq, post_int_seq,\
 																	timestamp_preint, timestamp_postint,\
@@ -132,6 +133,8 @@ class Generator:
 
 		for i in range(self.interv_time,self.time_range,self.post_int_len):
 			self.generate_post_int(i)
+
+		self.target_data[:,:self.cont_dim] = self.target_data[:,:self.cont_dim]*(self.data_max - self.data_min)+self.data_min
 
 		return self.target_data[:,0]
 
