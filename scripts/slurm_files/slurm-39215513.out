@@ -1,0 +1,20 @@
+Running experiment synthetic
+Pretraining model on donor units
+Traceback (most recent call last):
+  File "fitandpredict.py", line 110, in <module>
+    main()
+  File "fitandpredict.py", line 107, in main
+    fitandpredict(args)
+  File "fitandpredict.py", line 89, in fitandpredict
+    dscmodel.fit(interv_time)
+  File "/scratch/gpfs/bdedhia/deep_synthetic_ctrl/experiment/../dsc/dsc_model.py", line 74, in fit
+    self.pretrain(checkpoint_pretrain)
+  File "/scratch/gpfs/bdedhia/deep_synthetic_ctrl/experiment/../dsc/dsc_model.py", line 142, in pretrain
+    self.model = trainer_pretrain.train(int(num_iters),checkpoint_pretrain)
+  File "/scratch/gpfs/bdedhia/deep_synthetic_ctrl/experiment/../training/trainer.py", line 60, in train
+    target_cont, target_discrete = self.train_loader.get_batch(self.batch_size)
+  File "/scratch/gpfs/bdedhia/deep_synthetic_ctrl/experiment/../dataloader/dataloader.py", line 91, in get_batch
+    seq_ids = random.sample(self.seq_pool,self.K)
+  File "/home/bdedhia/.conda/envs/txf_design-space/lib/python3.8/random.py", line 363, in sample
+    raise ValueError("Sample larger than population or is negative")
+ValueError: Sample larger than population or is negative

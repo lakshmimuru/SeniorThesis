@@ -1,0 +1,18 @@
+Running experiment prop99
+Pretraining model on donor units
+Traceback (most recent call last):
+  File "fitandpredict.py", line 119, in <module>
+    main()
+  File "fitandpredict.py", line 116, in main
+    fitandpredict(args)
+  File "fitandpredict.py", line 98, in fitandpredict
+    dscmodel.fit(interv_time)
+  File "/scratch/gpfs/bdedhia/deep_synthetic_ctrl/experiment/../dsc/dsc_model.py", line 74, in fit
+    self.pretrain(checkpoint_pretrain)
+  File "/scratch/gpfs/bdedhia/deep_synthetic_ctrl/experiment/../dsc/dsc_model.py", line 142, in pretrain
+    self.model = trainer_pretrain.train(int(num_iters),checkpoint_pretrain)
+  File "/scratch/gpfs/bdedhia/deep_synthetic_ctrl/experiment/../training/trainer.py", line 60, in train
+    target_cont, target_discrete = self.train_loader.get_batch(self.batch_size)
+  File "/scratch/gpfs/bdedhia/deep_synthetic_ctrl/experiment/../dataloader/dataloader.py", line 130, in get_batch
+    timestamps_postint[i] = torch.from_numpy(timestamp_postint)
+RuntimeError: The expanded size of the tensor (5) must match the existing size (10) at non-singleton dimension 1.  Target sizes: [38, 5].  Tensor sizes: [38, 10]
