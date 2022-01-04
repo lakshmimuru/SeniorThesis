@@ -96,7 +96,7 @@ class PreTrainDataLoader:
 
 			timestamp_postint = np.repeat(self.time_ids[interv_time:\
 								interv_time+self.post_int_len].reshape(1,-1),self.K,axis=0)
-			
+			#print(timestamp_postint.shape)
 			attention_mask_preint = np.ones(timestamp_preint.shape)
 			attention_mask_postint = np.ones(timestamp_postint.shape)
 
@@ -115,7 +115,6 @@ class PreTrainDataLoader:
 
 				timestamp_postint = np.concatenate((np.zeros((self.K,self.post_int_len-seqlen)),timestamp_postint),axis=1)
 				attention_mask_postint = np.concatenate((np.zeros((self.K,self.post_int_len-seqlen)),attention_mask_postint),axis=1)
-
 
 			seqid_pre_int = np.repeat(np.asarray(seq_ids).reshape(-1,1),self.pre_int_len,axis=1)
 			seqid_post_int = np.repeat(np.asarray(seq_ids).reshape(-1,1),self.post_int_len,axis=1)

@@ -14,12 +14,14 @@ from transformers import BertConfig
 
 def fitandpredict(args):
 
+	print(f'Running experiment {args.exp_name}')
+
 	device = torch.device('cuda:0' if torch.cuda.is_available else "cpu")	
 
 	if not(os.path.exists(args.op_path)):
 		os.mkdir(args.op_path)
 
-	config = yaml.load(open(args.config_path,'r'),Loader=yaml.FullLoader)
+	config = yaml.load(open(args.config,'r'),Loader=yaml.FullLoader)
 	
 	if args.target_index is not None:
 		target_id = args.target_index
@@ -41,22 +43,13 @@ def fitandpredict(args):
 		interv_time = 18
 		classes = None 
 
-	elif args.exp_name == 'synthetic1':
+	elif args.exp_name == 'synthetic':
 		target_id = 0 #synthetic target has index 0
-		interv_time = 22
+		interv_time = 1600
 		classes = None 
 
-	elif args.exp_name == 'synthetic2':
-		target_id = 0 #synthetic target has index 0
-		interv_time = 22
-		classes = None 
 
-	elif args.exp_name == 'synthetic3':
-		target_id = 0 #synthetic target has index 0
-		interv_time = 22
-		classes = None 
-
-	if args.data_transform is not None:
+	if args.lowrank is not None:
 		lowrank = True
 	else:
 		lowrank = False
@@ -80,6 +73,7 @@ def fitandpredict(args):
                                 cont_dim=config['cont_dim'],
                                 discrete_dim=config['discrete_dim'],
                                 classes = classes)
+
 	model = Bert2BertSynCtrl(config_model, args.random_seed)
 	model = model.to(device)
 	dscmodel = DSCModel(model,
@@ -94,7 +88,7 @@ def fitandpredict(args):
 
 	dscmodel.fit(interv_time)
 	op = dscmodel.predict(interv_time)
-	target_id = np.save(op_path+'target.npy',op)
+	target_id = np.save(args.op_path+'target.npy',op)
 
 def main():
 
@@ -110,7 +104,7 @@ def main():
 	parser.add_argument('--interv_time',type=int,default=None)
 	parser.add_argument('--lowrank',type=str,default=None)
 	args = parser.parse_args()
-	run_analysis(args)
+	fitandpredict(args)
 
 if __name__ == "__main__":
     main()

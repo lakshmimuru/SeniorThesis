@@ -132,7 +132,8 @@ module purge
 module load anaconda3/2020.7
 conda activate txf_design-space
 cd ..
-cd experiment fitandpredict.py --exp_name ${exp} --datapath ${datapath}  --config ${config} --op_path ${op_path} --random_seed ${random_seed}"> $job_file
+cd experiment
+python -u fitandpredict.py --exp_name ${exp} --datapath ${datapath}  --config ${config} --op_path ${op_path} --random_seed ${random_seed}"> $job_file
 
 sbatch $job_file
 

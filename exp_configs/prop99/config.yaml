@@ -10,9 +10,9 @@ K: 38
 pre_int_len: 10
 post_int_len: 5
 seq_range: 39
-time_range: 44
+time_range: 31
 
-batch_size: 1024
+batch_size: 128
 lr: 1e-4
 weight_decay: 1e-4
-warmup_steps: 10000
+warmup_steps: 5000

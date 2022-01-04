@@ -33,6 +33,7 @@ class Generator:
 		self.device = device
 		self.interv_time = interv_time
 		self.K = self.config.K
+		print(self.K)
 		self.feature_dim = self.config.feature_dim
 		self.pre_int_len = self.config.pre_int_len
 		self.post_int_len = self.config.post_int_len
