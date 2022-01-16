@@ -33,7 +33,6 @@ class Generator:
 		self.device = device
 		self.interv_time = interv_time
 		self.K = self.config.K
-		print(self.K)
 		self.feature_dim = self.config.feature_dim
 		self.pre_int_len = self.config.pre_int_len
 		self.post_int_len = self.config.post_int_len
@@ -68,15 +67,15 @@ class Generator:
 
 	def generate_post_int(self,interv_time):
 
-		pre_int_seq_donor = self.data[:,interv_time - self.pre_int_len:interv_time]
-		pre_int_seq_target = np.expand_dims(self.target_data[interv_time - self.pre_int_len:interv_time],0)
+		pre_int_seq_donor = self.data[:,max(interv_time - self.pre_int_len,0):interv_time]
+		pre_int_seq_target = np.expand_dims(self.target_data[max(interv_time - self.pre_int_len,0):interv_time],0)
 		pre_int_seq = np.concatenate((pre_int_seq_donor,pre_int_seq_target),0)
 		post_int_seq_donor = self.data[:,interv_time:interv_time+self.post_int_len]
 		post_int_seq_target = np.zeros((1,post_int_seq_donor.shape[1],self.feature_dim))
 		post_int_seq = np.concatenate((post_int_seq_donor,post_int_seq_target),0)
 		seqid_pre_int = np.repeat(np.asarray(self.seq_ids).reshape(-1,1),self.pre_int_len,axis=1)
 		seqid_post_int = np.repeat(np.asarray(self.seq_ids).reshape(-1,1),self.post_int_len,axis=1)
-		timestamp_preint = np.repeat(self.time_ids[interv_time - self.pre_int_len\
+		timestamp_preint = np.repeat(self.time_ids[max(interv_time - self.pre_int_len,0)\
 								:interv_time].reshape(1,-1),self.K,axis=0)
 		post_int_lim = min(self.time_range,interv_time+self.post_int_len)
 		timestamp_postint = np.repeat(self.time_ids[interv_time:\
@@ -84,7 +83,14 @@ class Generator:
 		
 		attention_mask_preint = np.ones(timestamp_preint.shape)
 		attention_mask_postint = np.ones(timestamp_postint.shape)
-		
+
+		if pre_int_seq.shape[1]<self.pre_int_len:
+			seqlen = pre_int_seq.shape[1]
+			pre_int_seq = np.concatenate([np.zeros((self.K,self.pre_int_len-seqlen\
+						,self.feature_dim)),pre_int_seq],axis=1)
+			timestamp_preint = np.concatenate([np.zeros((self.K,self.pre_int_len-seqlen)),timestamp_preint],axis=1)
+			attention_mask_preint = np.concatenate([np.zeros((self.K,self.pre_int_len-seqlen)),attention_mask_preint],axis=1)
+
 		if post_int_seq.shape[1]<self.post_int_len:
 			seqlen = post_int_seq.shape[1]
 			post_int_seq = np.concatenate([np.zeros((self.K,self.post_int_len-seqlen\
@@ -131,6 +137,8 @@ class Generator:
 
 
 	def sliding_window_generate(self):
+
+		self.model.eval()
 
 		for i in range(self.interv_time,self.time_range,self.post_int_len):
 			self.generate_post_int(i)
