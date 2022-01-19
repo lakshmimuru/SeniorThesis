@@ -29,7 +29,7 @@ def fitandpredict(args):
 		classes = None 
 	
 	elif args.exp_name == 'basque':
-		target_id = 16#basque county has index 16
+		target_id = 16#basque country has index 16
 		interv_time = 15
 		classes = None 
 
@@ -83,12 +83,12 @@ def fitandpredict(args):
 	                    args.random_seed,
 	                    args.datapath,
 	                    device,
-	                    lowrank = False,
+	                    lowrank = lowrank,
 	                    classes=None)
 
 	dscmodel.fit(interv_time)
 	op = dscmodel.predict(interv_time)
-	target_id = np.save(args.op_path+'target.npy',op)
+	np.save(args.op_path+'target.npy',op)
 
 def main():
 
