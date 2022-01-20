@@ -25,7 +25,7 @@ def low_rank(data, pct_to_keep):
 
 class PreTrainDataLoader:
 
-	def __init__(self, seed, dir_path, device, config, target_id, lowrank_approx = False, pct_to_keep = 50):
+	def __init__(self, seed, dir_path, device, config, target_id, lowrank_approx = False, pct_to_keep = 20):
 
 		#exlude_ids is 
 		torch.manual_seed(seed)
@@ -162,7 +162,7 @@ class PreTrainDataLoader:
 
 class FinetuneDataLoader(object):
 
-	def __init__(self, seed, dir_path, device, config, target_id, interv_time, lowrank_approx = False, pct_to_keep = 50):
+	def __init__(self, seed, dir_path, device, config, target_id, interv_time, lowrank_approx = False, pct_to_keep = 20):
 
 		torch.manual_seed(seed)
 		np.random.seed(seed)
@@ -225,7 +225,7 @@ class FinetuneDataLoader(object):
 
 			interv_time = np.random.randint(self.pre_int_len,self.interv_time-1)
 			pre_int_seq = self.data[:,interv_time - self.pre_int_len:interv_time]
-			post_int_lim = min(self.time_range,interv_time+self.post_int_len)
+			post_int_lim = min(self.interv_time,interv_time+self.post_int_len)
 			post_int_seq = self.data[:,interv_time:post_int_lim]
 			timestamp_preint = np.repeat(self.time_ids[interv_time - self.pre_int_len:interv_time].reshape(1,-1),self.K,axis=0)
 
