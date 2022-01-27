@@ -3,16 +3,16 @@ cont_dim: 5
 discrete_dim: 0
 
 hidden_size: 128
-n_layers: 4
-n_heads: 2
+n_layers: 3
+n_heads: 1
 
 K: 38
-pre_int_len: 10
-post_int_len: 5
+pre_int_len: 5
+post_int_len: 2
 seq_range: 39
 time_range: 31
 
-batch_size: 128
+batch_size: 64
 lr: 1e-4
 weight_decay: 1e-4
-warmup_steps: 5000
+warmup_steps: 1000

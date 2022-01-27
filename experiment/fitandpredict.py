@@ -92,7 +92,7 @@ def fitandpredict(args):
 
 def main():
 
-	'''Pretrain finetune and '''
+	'''Pretrain finetune and predict '''
 	parser = argparse.ArgumentParser(description='Experiment parameters',
 									formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 	parser.add_argument('--exp_name',type=str,default='basque')

@@ -5,15 +5,15 @@ import torch
 import random
 
 
-def low_rank(data, pct_to_keep):
+def low_rank(data, sing_to_keep):
 
 	data_flat = data.reshape(len(data),-1) 
 	u, s, v = np.linalg.svd(data_flat.astype(float))
 
-	k = int(np.rint(len(s)*pct_to_keep/100))
-	u_approx = u[:, :k]
-	s_approx = np.diag(s[:k])
-	v_approx = v[:k, :]
+	#k = int(np.rint(len(s)*pct_to_keep/100))
+	u_approx = u[:, :sing_to_keep]
+	s_approx = np.diag(s[:sing_to_keep])
+	v_approx = v[:sing_to_keep, :]
 
 	approx_flat = np.dot(u_approx, np.dot(s_approx, v_approx))
 	approx = approx_flat.reshape(data.shape[0], data.shape[1], data.shape[2])
@@ -25,7 +25,7 @@ def low_rank(data, pct_to_keep):
 
 class PreTrainDataLoader:
 
-	def __init__(self, seed, dir_path, device, config, target_id, lowrank_approx = False, pct_to_keep = 20):
+	def __init__(self, seed, dir_path, device, config, target_id, lowrank_approx = False, sing_to_keep =3):
 
 		#exlude_ids is 
 		torch.manual_seed(seed)
@@ -46,7 +46,7 @@ class PreTrainDataLoader:
 		target_data = self.data_init[target_id] 
 		red_data = np.delete(self.data_init,self.target_id,0)
 		if lowrank_approx:	
-			red_data[:,:,:self.cont_dim] = low_rank(red_data[:,:,:self.cont_dim],pct_to_keep)
+			red_data[:,:,:self.cont_dim] = low_rank(red_data[:,:,:self.cont_dim],sing_to_keep)
 			#fraction adjust estimator
 			data_min = np.amin(red_data.reshape(-1,self.feature_dim),0)[:self.cont_dim]
 			data_max = np.amax(red_data.reshape(-1,self.feature_dim),0)[:self.cont_dim]
@@ -162,7 +162,7 @@ class PreTrainDataLoader:
 
 class FinetuneDataLoader(object):
 
-	def __init__(self, seed, dir_path, device, config, target_id, interv_time, lowrank_approx = False, pct_to_keep = 20):
+	def __init__(self, seed, dir_path, device, config, target_id, interv_time, lowrank_approx = False, sing_to_keep = 3):
 
 		torch.manual_seed(seed)
 		np.random.seed(seed)
@@ -182,7 +182,7 @@ class FinetuneDataLoader(object):
 		self.target_data = self.data_init[target_id]
 		red_data = np.delete(self.data_init,target_id,0)
 		if lowrank_approx:
-			red_data[:,:,:self.cont_dim] = low_rank(red_data[:,:,:self.cont_dim],pct_to_keep)
+			red_data[:,:,:self.cont_dim] = low_rank(red_data[:,:,:self.cont_dim],sing_to_keep)
 			data_min = np.amin(red_data.reshape(-1,self.feature_dim),0)[:self.cont_dim]
 			data_max = np.amax(red_data.reshape(-1,self.feature_dim),0)[:self.cont_dim]
 			self.data = np.concatenate((red_data,self.target_data.reshape(1,-1,self.feature_dim)),0)

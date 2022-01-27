@@ -1,0 +1,18 @@
+feature_dim: 2
+cont_dim: 2
+discrete_dim: 0
+
+hidden_size: 32
+n_layers: 3
+n_heads: 1
+
+K: 15
+pre_int_len: 12
+post_int_len: 6
+seq_range: 16
+time_range: 2000
+
+batch_size: 128
+lr: 1e-4
+weight_decay: 1e-4
+warmup_steps: 2000
