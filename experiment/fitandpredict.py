@@ -84,7 +84,7 @@ def fitandpredict(args):
 	                    args.datapath,
 	                    device,
 	                    lowrank = lowrank,
-	                    classes=None)
+	                    classes= classes)
 
 	dscmodel.fit(interv_time)
 	op = dscmodel.predict(interv_time)
