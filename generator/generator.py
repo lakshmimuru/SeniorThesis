@@ -49,7 +49,7 @@ class Generator:
 			self.data_min = np.amin(red_data.reshape(-1,self.feature_dim),0)[:self.cont_dim]
 			self.data_max = np.amax(red_data.reshape(-1,self.feature_dim),0)[:self.cont_dim]
 			self.data = red_data
-			self.data[:,:,:self.cont_dim] = (red_data[:,:,:self.cont_dim] - data_min)/(data_max - data_min)
+			self.data[:,:,:self.cont_dim] = (red_data[:,:,:self.cont_dim] - self.data_min)/(self.data_max - self.data_min)
 
 		else:
 			self.data_min = np.amin(red_data.reshape(-1,self.feature_dim),0)[:self.cont_dim]
