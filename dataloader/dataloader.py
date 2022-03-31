@@ -152,7 +152,7 @@ class PreTrainDataLoader:
 		targets_cont = targets_cont.to(dtype=torch.float32,device=self.device)
 
 		if targets_discrete is not None:
-			targets_discrete = targets_discrete.to(type=torch.long, device=self.device)
+			targets_discrete = targets_discrete.to(dtype=torch.long, device=self.device)
 
 		return pre_int_seqs, post_int_seqs, timestamps_preint,\
 				timestamps_postint, seqids_preint, seqids_postint,\

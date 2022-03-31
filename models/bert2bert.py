@@ -111,7 +111,7 @@ class Bert2BertSynCtrl(nn.Module):
 		decoder_outputs = last_hidden_state.reshape(batch_size,self.post_int_len,self.K,self.hidden_dim).permute(0,2,1,3)
 		cont_target_preds = self.predict_cont_target(decoder_outputs)[:,self.K-2] #predict target seq using the hidden state from last donor (any donor hidden unit can be used)
 		if self.predict_discrete_target is not None:
-			discrete_target_preds = [self.predict_discret_target[i](decoder_outputs)[:,self.K-2] 
+			discrete_target_preds = [self.predict_discrete_target[i](decoder_outputs)[:,self.K-2] 
 												for i in range(self.discrete_dim)]
 		else:
 			discrete_target_preds = None
