@@ -104,8 +104,30 @@ class DSCModel(object):
 
         return target_data
 
+    def return_attention(self, interv_time):
 
-    def pretrain(self, checkpoint_pretrain, num_iters=5e4):
+
+        if self.model.Bert2BertSynCtrl.config.encoder.K == self.config['K']:
+            print('Modifying K')
+            self.model.config.K+=1
+            self.model.K+=1
+            self.model.Bert2BertSynCtrl.encoder.config.K+=1
+            self.model.Bert2BertSynCtrl.decoder.config.K+=1
+
+        generator = Generator(self.model,
+                    self.device,
+                    self.datapath,
+                    self.target_id,
+                    interv_time,
+                    self.lowrank)
+
+        attention_weights =  generator.sliding_attention()
+       
+
+        return attention_weights
+
+
+    def pretrain(self, checkpoint_pretrain, num_iters=5e3):
 
 
         dataloader_pretrain = PreTrainDataLoader(self.random_seed,
@@ -142,7 +164,7 @@ class DSCModel(object):
         self.model = trainer_pretrain.train(int(num_iters),checkpoint_pretrain)
 
 
-    def finetune(self, interv_time, num_iters=1e4):
+    def finetune(self, interv_time, num_iters=1e3):
 
         dataloader_finetune = FinetuneDataLoader(self.random_seed,
                                     self.datapath,
