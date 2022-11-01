@@ -184,10 +184,10 @@ class Bert2BertSynCtrl(nn.Module):
 		else:
 			discrete_target_preds = None
 
-		last_attention = outputs.decoder_attentions[-1]
+		attentions = outputs.decoder_attentions
 
 		
-		return cont_target_preds, discrete_target_preds, last_attention
+		return cont_target_preds, discrete_target_preds, attentions
 
 
 	def generate_post_int(self, 
@@ -241,7 +241,7 @@ class Bert2BertSynCtrl(nn.Module):
 		'''
 
 		with torch.no_grad():
-			outputs_cont, outputs_discrete, attention = self.forward_attention(pre_int_seq, 
+			outputs_cont, outputs_discrete, attentions = self.forward_attention(pre_int_seq, 
 								post_int_seq,
 								timestamps_pre_int, 
 								timestamps_post_int, 
@@ -255,9 +255,15 @@ class Bert2BertSynCtrl(nn.Module):
 
 		if outputs_discrete is not None:
 			outputs_discrete = torch.stack([torch.argmax(pred[0,0]).reshape(1,-1) for pred in outputs_discrete],dim=1).reshape(-1)
+            
+		all_attentions = []
+        
+		for attention_map in attentions:
+            
+			all_attentions.append(attention_map[0,0,self.K-2,:self.K-1].cpu().numpy())
 			
 		
-		return outputs_cont[0, 0], outputs_discrete, attention[0,0,self.K-2,:self.K-1]
+		return outputs_cont[0, 0], outputs_discrete, all_attentions
 
 
 
