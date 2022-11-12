@@ -26,6 +26,8 @@ class Generator:
 				target_id,
 				interv_time,
 				lowrank_approx,
+				topk=None,
+				weights=None,
                 sing_to_keep = 3
 				):
 
@@ -57,11 +59,14 @@ class Generator:
 			self.data_max = np.amax(red_data.reshape(-1,self.feature_dim),0)[:self.cont_dim]
 			self.data = red_data
 			self.data[:,:,:self.cont_dim] = (red_data[:,:,:self.cont_dim] - self.data_min)/(self.data_max - self.data_min)	
+		if topk is not None:
+			get_indices = np.argpartition(weights,-topk)[-topk:]
+			self.data = self.data[get_indices]
 
 		self.target_data[:,:self.cont_dim] = (self.target_data[:,:self.cont_dim]- self.data_min)/(self.data_max - self.data_min)
 		self.target_data[:,1:self.cont_dim] = 0
 		self.seqs = self.config.seq_range
-		self.time_range = self.config.time_range		
+		self.time_range = self.config.time_range	
 		self.seq_pool = [i for i in range(self.seqs) if i!=self.target_id]
 		self.seq_ids = np.asarray(self.seq_pool+[self.target_id])
 		self.time_ids = np.arange(self.time_range)
@@ -115,9 +120,8 @@ class Generator:
 		attention_mask_preint = torch.unsqueeze(torch.from_numpy(attention_mask_preint).to(dtype = torch.long,device=self.device),0)
 		attention_mask_postint = torch.unsqueeze(torch.from_numpy(attention_mask_postint).to(dtype = torch.long,device=self.device),0)
 		
+
 		for i in range(min(self.post_int_len,self.time_range-interv_time)):
-
-
 
 			cont_target, disc_target = self.model.generate_post_int(pre_int_seq, post_int_seq,\
 																	timestamp_preint, timestamp_postint,\
@@ -199,7 +203,7 @@ class Generator:
 
 
 		self.target_data[interv_time,0] = cont_target.cpu().numpy()
-		return attention.cpu().numpy()
+		return attention
 
 
 

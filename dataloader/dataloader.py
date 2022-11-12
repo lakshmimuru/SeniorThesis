@@ -25,7 +25,7 @@ def low_rank(data, sing_to_keep):
 
 class PreTrainDataLoader:
 
-	def __init__(self, seed, dir_path, device, config, target_id, lowrank_approx = False, sing_to_keep =3):
+	def __init__(self, seed, dir_path, device, config, target_id, topk = None,weights=None, lowrank_approx = False, sing_to_keep =55):
 
 		#exlude_ids is 
 		torch.manual_seed(seed)
@@ -44,7 +44,15 @@ class PreTrainDataLoader:
 		self.mask = np.load(dir_path+'mask.npy',allow_pickle=True).astype(bool)
 		self.data_init[self.mask] = 0
 		target_data = self.data_init[target_id] 
-		red_data = np.delete(self.data_init,self.target_id,0)
+
+		if topk is not None:
+			get_indices = np.argpartition(weights,-topk)[-topk:] +1
+			red_data = self.data_init[get_indices]
+
+		else:
+			red_data = np.delete(self.data_init,target_id,0)
+
+        
 		if lowrank_approx:	
 			red_data[:,:,:self.cont_dim] = low_rank(red_data[:,:,:self.cont_dim],sing_to_keep)
 			#fraction adjust estimator
@@ -56,8 +64,9 @@ class PreTrainDataLoader:
 		else:
 			data_min = np.amin(red_data.reshape(-1,self.feature_dim),0)
 			data_max = np.amax(red_data.reshape(-1,self.feature_dim),0)
-			self.data = self.data_init
+			self.data = np.insert(red_data,target_id,target_data,0)	
 			self.data[:,:,:self.cont_dim] = (self.data[:,:,:self.cont_dim] - data_min)/(data_max - data_min)	
+		
 		self.seqs = config.seq_range
 		self.seq_pool = [i for i in range(self.data.shape[0]) if i!=self.target_id]
 		self.time_range = config.time_range
@@ -162,7 +171,7 @@ class PreTrainDataLoader:
 
 class FinetuneDataLoader(object):
 
-	def __init__(self, seed, dir_path, device, config, target_id, interv_time, lowrank_approx = False, sing_to_keep = 3):
+	def __init__(self, seed, dir_path, device, config, target_id, interv_time, topk=None,weights=None, lowrank_approx = False, sing_to_keep = 5):
 
 		torch.manual_seed(seed)
 		np.random.seed(seed)
@@ -179,8 +188,16 @@ class FinetuneDataLoader(object):
 		self.data_init = np.float32(np.load(dir_path+'data.npy',allow_pickle=True))
 		self.mask = np.load(dir_path+'mask.npy',allow_pickle=True).astype(bool)
 		self.data_init[self.mask] = 0
-		self.target_data = self.data_init[target_id]
-		red_data = np.delete(self.data_init,target_id,0)
+		self.target_data = self.data_init[target_id] 
+	
+		if topk is not None:
+			get_indices = np.argpartition(weights,-topk)[-topk:] +1
+			red_data = self.data_init[get_indices]
+
+		else:
+			red_data = np.delete(self.data_init,target_id,0)
+
+        
 		if lowrank_approx:
 			red_data[:,:,:self.cont_dim] = low_rank(red_data[:,:,:self.cont_dim],sing_to_keep)
 			data_min = np.amin(red_data.reshape(-1,self.feature_dim),0)[:self.cont_dim]
@@ -193,6 +210,7 @@ class FinetuneDataLoader(object):
 			data_max = np.amax(red_data.reshape(-1,self.feature_dim),0)
 			self.data = np.concatenate((red_data,self.target_data.reshape(1,-1,self.feature_dim)),0)
 			self.data[:,:,:self.cont_dim] = (self.data[:,:,:self.cont_dim] - data_min)/(data_max - data_min)
+		
 		self.data[self.K-1,:,1:self.cont_dim] = 0
 		self.seqs = config.seq_range
 		self.target_id = target_id

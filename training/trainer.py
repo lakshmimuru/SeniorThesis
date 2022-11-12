@@ -58,7 +58,6 @@ class Trainer:
             pre_int_seq, post_int_seq, timestamps_pre_int, timestamps_post_int, seq_ids_pre_int,\
             seq_ids_post_int, target_pre_int, target_post_int, attention_mask_pre_int, attention_mask_post_int, \
             target_cont, target_discrete = self.train_loader.get_batch(self.batch_size)
-                
             
 
             cont_pred, discrete_pred = self.model(pre_int_seq,

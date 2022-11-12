@@ -7,8 +7,8 @@ n_layers: 3
 n_heads: 1
 
 K: 25
-pre_int_len: 8
-post_int_len: 4
+pre_int_len: 10
+post_int_len: 5
 seq_range: 26
 time_range: 2000
 

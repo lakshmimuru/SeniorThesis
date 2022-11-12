@@ -30,6 +30,8 @@ class DSCModel(object):
                 random_seed,
                 datapath,
                 device,
+                topk,
+                weights,
                 lowrank=False,
                 classes=None):
 
@@ -42,6 +44,8 @@ class DSCModel(object):
         self.device = device
         self.lowrank = lowrank
         self.classes = classes
+        self.topk = topk
+        self.weights = weights
 
         self.config_model = BertConfig(hidden_size = config['hidden_size'],
                             num_hidden_layers = config['n_layers'],
@@ -92,12 +96,15 @@ class DSCModel(object):
             self.model.K+=1
             self.model.Bert2BertSynCtrl.encoder.config.K+=1
             self.model.Bert2BertSynCtrl.decoder.config.K+=1
+            
         generator = Generator(self.model,
                     self.device,
                     self.datapath,
                     self.target_id,
                     interv_time,
-                    self.lowrank)
+                    self.lowrank,
+                    topk=self.topk,
+                    weights=self.weights)
 
         target_data =  generator.sliding_window_generate()
        
@@ -127,7 +134,7 @@ class DSCModel(object):
         return attention_weights
 
 
-    def pretrain(self, checkpoint_pretrain, num_iters=5e3):
+    def pretrain(self, checkpoint_pretrain, num_iters=5e4):
 
 
         dataloader_pretrain = PreTrainDataLoader(self.random_seed,
@@ -135,6 +142,8 @@ class DSCModel(object):
                                     self.device,
                                     self.config_model,
                                     self.target_id,
+                                    self.topk,
+                                    self.weights,
                                     lowrank_approx = self.lowrank)
 
         optimizer_pretrain = torch.optim.AdamW(self.model.parameters(),
@@ -164,7 +173,7 @@ class DSCModel(object):
         self.model = trainer_pretrain.train(int(num_iters),checkpoint_pretrain)
 
 
-    def finetune(self, interv_time, num_iters=1e3):
+    def finetune(self, interv_time, num_iters=5e3):
 
         dataloader_finetune = FinetuneDataLoader(self.random_seed,
                                     self.datapath,
@@ -172,6 +181,8 @@ class DSCModel(object):
                                     self.config_model,
                                     self.target_id,
                                     interv_time,
+                                    self.topk,
+                                    self.weights,
                                     lowrank_approx = self.lowrank)
 
         optimizer_finetune = torch.optim.AdamW(self.model.parameters(),
@@ -195,19 +206,8 @@ class DSCModel(object):
 
     def load_model_from_checkpoint(self,modelpath):
 
-        cp = torch.load(modelpath)
+        cp = torch.load(modelpath,map_location=self.device)
         state_dict = cp['model_state_dict']
         self.model.load_state_dict(state_dict)
-
-
-
-
-
-
-
-
-
-
-
 
 

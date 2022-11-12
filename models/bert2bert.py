@@ -10,6 +10,7 @@ import torch.nn as nn
 import copy
 
 
+
 class Bert2BertSynCtrl(nn.Module):
 	'''
 	This model is an encoder decoder model that enoodes in pre-intervention sequences and generates the control from post-intervention data of donor states
@@ -20,6 +21,7 @@ class Bert2BertSynCtrl(nn.Module):
 		'''
 		Initialize a syn ctrl encoder decoder model.
 		'''
+
 
 		super().__init__()
 
