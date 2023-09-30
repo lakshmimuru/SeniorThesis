@@ -2,7 +2,8 @@
 
 import torch
 import sys
-sys.path.append('../transformers/src/')
+# sys.path.append('../transformers/src/')
+sys.path.append('/Users/lakshmimurugappan/Desktop/Princeton/Senior Thesis/deep_synthetic_ctrl/transformers')
 from transformers import BertConfig, EncoderDecoderModel
 from transformers.models.bert.modeling_bert_syn_ctrl import BertModelSynCtrl
 import numpy as np
