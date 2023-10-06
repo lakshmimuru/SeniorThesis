@@ -14,11 +14,11 @@ sys.path.append('../transformers/src/')
 sys.path.append('../generator/')
 
 import numpy as np
-from bert2bert import Bert2BertSynCtrl
+from models.bert2bert import Bert2BertSynCtrl
 from transformers import BertConfig
-from trainer import Trainer 
-from dataloader import PreTrainDataLoader, FinetuneDataLoader
-from generator import Generator
+from training.trainer import Trainer 
+from dataloader.dataloader import PreTrainDataLoader, FinetuneDataLoader
+from generator.generator import Generator
 
 class DSCModel(object):
 
@@ -146,6 +146,7 @@ class DSCModel(object):
                                     self.weights,
                                     lowrank_approx = self.lowrank)
 
+        dataloader_pretrain.pre_int_seq
         optimizer_pretrain = torch.optim.AdamW(self.model.parameters(),
                                     lr=eval(self.config['lr']),
                                     weight_decay=eval(self.config['weight_decay']),
@@ -156,6 +157,7 @@ class DSCModel(object):
                     optimizer_pretrain,
                     lambda steps: min((steps+1)/warmup_steps,1))
         batch_size = self.config['batch_size']
+        mask_ratio = self.config['mask_ratio']
         op_path_pretrain = self.op_dir + 'pretrain/'
         if not(os.path.exists(op_path_pretrain)):
             os.mkdir(op_path_pretrain)
@@ -165,7 +167,8 @@ class DSCModel(object):
                         dataloader_pretrain,
                         op_path_pretrain,
                         batch_size,
-                        scheduler
+                        scheduler,
+                        mask_ratio
                         )
 
         print('Pretraining model on donor units')
@@ -190,6 +193,7 @@ class DSCModel(object):
                                 weight_decay=eval(self.config['weight_decay']),
                                     )
         batch_size = self.config['batch_size']
+        mask_ratio=0
         op_path_finetune = self.op_dir + 'finetune/'
         if not(os.path.exists(op_path_finetune)):
             os.mkdir(op_path_finetune)
@@ -197,7 +201,8 @@ class DSCModel(object):
                             optimizer_finetune,
                             dataloader_finetune,
                             op_path_finetune,
-                            batch_size
+                            batch_size,
+                            mask_ratio
                             )
 
         print('Fitting model on target unit')

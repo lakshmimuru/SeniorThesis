@@ -13,6 +13,8 @@ seq_range: 275
 time_range: 20
 
 batch_size: 16
+mask_ratio : 0.15
 lr: 1e-4
 weight_decay: 1e-4
 warmup_steps: 10000
+

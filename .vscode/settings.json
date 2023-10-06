@@ -1,0 +1,6 @@
+{
+    "python.analysis.extraPaths": [
+        "./transformers/examples/research_projects/deebert",
+        "./transformers"
+    ]
+}

@@ -10,11 +10,11 @@ import yaml
 sys.path.append('../models/')
 sys.path.append('../dataloader/')
 sys.path.append('../transformers/src/')
-from dataloader import low_rank
-from bert2bert import Bert2BertSynCtrl
+from dataloader.dataloader import low_rank
+from models.bert2bert import Bert2BertSynCtrl
 from transformers import BertConfig
-from trainer import Trainer 
-from dataloader import FinetuneDataLoader
+from training.trainer import Trainer 
+from dataloader.dataloader import FinetuneDataLoader
 
 
 class Generator:
@@ -130,7 +130,7 @@ class Generator:
 																	attention_mask_preint,attention_mask_postint,\
 																	i)
 			if disc_target is not None:
-				disc_target = disc_target.to(dtype=float32)
+				disc_target = disc_target.to(dtype=np.float32)
 				post_int_seq[0,self.K-1,i,0] = cont_target
 				post_int_seq[0,self.K-1,i,self.cont_dim:] = disc_target
 

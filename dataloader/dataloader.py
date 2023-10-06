@@ -3,6 +3,7 @@
 import numpy as np 
 import torch
 import random
+from torch import nn
 
 
 def low_rank(data, sing_to_keep):
@@ -75,7 +76,7 @@ class PreTrainDataLoader:
 
 
 
-	def get_batch(self, batch_size):
+	def get_batch(self, batch_size, mask_ratio):
 
 		
 		pre_int_seqs = torch.zeros(batch_size,self.K,self.pre_int_len,self.feature_dim)
@@ -125,6 +126,13 @@ class PreTrainDataLoader:
 				timestamp_postint = np.concatenate((np.zeros((self.K,self.post_int_len-seqlen)),timestamp_postint),axis=1)
 				attention_mask_postint = np.concatenate((np.zeros((self.K,self.post_int_len-seqlen)),attention_mask_postint),axis=1)
 
+			# create random array of floats in equal dimension to input sequence (pre_int_seq)
+			rand = torch.rand(pre_int_seq.shape)
+			# where the random array is less than the mask ratio, we set true
+			missing_mask = rand < mask_ratio
+			mask_token=0
+			pre_int_seq[missing_mask]=mask_token
+
 			seqid_pre_int = np.repeat(np.asarray(seq_ids).reshape(-1,1),self.pre_int_len,axis=1)
 			seqid_post_int = np.repeat(np.asarray(seq_ids).reshape(-1,1),self.post_int_len,axis=1)
 			target_mask_preint = torch.zeros(self.K,self.pre_int_len)
@@ -167,6 +175,8 @@ class PreTrainDataLoader:
 				timestamps_postint, seqids_preint, seqids_postint,\
 				target_masks_preint, target_masks_postint, attention_masks_preint,\
 				attention_masks_postint, targets_cont, targets_discrete
+	
+		
 
 
 class FinetuneDataLoader(object):

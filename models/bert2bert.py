@@ -2,15 +2,13 @@
 
 import torch
 import sys
-# sys.path.append('../transformers/src/')
-sys.path.append('/Users/lakshmimurugappan/Desktop/Princeton/Senior Thesis/deep_synthetic_ctrl/transformers')
+sys.path.append('../transformers/src/')
+#sys.path.append('/Users/lakshmimurugappan/Desktop/Princeton/Senior Thesis/deep_synthetic_ctrl/transformers')
 from transformers import BertConfig, EncoderDecoderModel
 from transformers.models.bert.modeling_bert_syn_ctrl import BertModelSynCtrl
 import numpy as np
 import torch.nn as nn
 import copy
-
-
 
 class Bert2BertSynCtrl(nn.Module):
 	'''
@@ -110,8 +108,12 @@ class Bert2BertSynCtrl(nn.Module):
 										decoder_attention_mask=attention_mask_post_int,
 										)
 
-		last_hidden_state = outputs.decoder_hidden_states[-1]
-		decoder_outputs = last_hidden_state.reshape(batch_size,self.post_int_len,self.K,self.hidden_dim).permute(0,2,1,3)
+		#last_hidden_state = outputs.decoder_hidden_states[-1]
+		last_hidden_state_decoder = outputs.decoder_hidden_states[-1]
+		last_hidden_state_encoder = outputs.encoder_hidden_states[-1]
+		#decoder_outputs = last_hidden_state.reshape(batch_size,self.post_int_len,self.K,self.hidden_dim).permute(0,2,1,3)
+		decoder_outputs = last_hidden_state_decoder.reshape(batch_size,self.post_int_len,self.K,self.hidden_dim).permute(0,2,1,3)
+		encoder_outputs = last_hidden_state_encoder.reshape(batch_size,self.post_int_len,self.K,self.hidden_dim).permute(0,2,1,3)
 		cont_target_preds = self.predict_cont_target(decoder_outputs)[:,self.K-2] #predict target seq using the hidden state from last donor (any donor hidden unit can be used)
 		if self.predict_discrete_target is not None:
 			discrete_target_preds = [self.predict_discrete_target[i](decoder_outputs)[:,self.K-2] 
@@ -177,9 +179,13 @@ class Bert2BertSynCtrl(nn.Module):
 										output_attentions = True,
 										)
 
-		last_hidden_state = outputs.decoder_hidden_states[-1]
+		#last_hidden_state = outputs.decoder_hidden_states[-1]
+		last_hidden_state_decoder = outputs.decoder_hidden_states[-1]
+		last_hidden_state_encoder = outputs.encoder_hidden_states[-1]
+		#decoder_outputs = last_hidden_state.reshape(batch_size,self.post_int_len,self.K,self.hidden_dim).permute(0,2,1,3)
+		decoder_outputs = last_hidden_state_decoder.reshape(batch_size,self.post_int_len,self.K,self.hidden_dim).permute(0,2,1,3)
+		encoder_outputs = last_hidden_state_encoder.reshape(batch_size,self.post_int_len,self.K,self.hidden_dim).permute(0,2,1,3)
 
-		decoder_outputs = last_hidden_state.reshape(batch_size,self.post_int_len,self.K,self.hidden_dim).permute(0,2,1,3)
 		cont_target_preds = self.predict_cont_target(decoder_outputs)[:,self.K-2] 
 		if self.predict_discrete_target is not None:
 			discrete_target_preds = [self.predict_discret_target[i](decoder_outputs)[:,self.K-2] 
